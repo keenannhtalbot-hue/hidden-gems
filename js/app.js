@@ -117,7 +117,7 @@ function render() {
       style: { position: 'sticky', top: '0', zIndex: '200' }
     }, [
       h('div', { class: 'brand' }, [
-        h('span', { class: 'brand-mark', html: ICONS.willow('#5a7355') }),
+        h('span', { class: 'brand-mark', style: { width: '40px', height: '40px', display: 'inline-block', flexShrink: 0 }, html: ICONS.willow('#5a7355') }),
         h('span', {}, ['Izzy\u2019s Wanderings'])
       ]),
       h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
@@ -148,7 +148,7 @@ function render() {
         'aria-current': currentTab === t.id ? 'page' : 'false',
         onClick: () => switchTab(t.id)
       }, [
-        h('span', { class: 'icon', html: t.icon }),
+        h('span', { class: 'icon', style: { width: '28px', height: '28px', display: 'grid', placeItems: 'center', flexShrink: 0 }, html: t.icon }),
         h('span', {}, [t.label])
       ])
     )
