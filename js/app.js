@@ -108,8 +108,13 @@ function render() {
   const app = document.getElementById('app');
   const player = getCurrentPlayer();
   app.innerHTML = '';
+  // CRITICAL: app shell must sit ABOVE all background atmosphere
+  app.style.cssText = 'position:relative;z-index:100;';
 
-  app.appendChild(h('header', { class: 'app-header' }, [
+  app.appendChild(h('header', {
+    class: 'app-header',
+    style: { position: 'sticky', top: '0', zIndex: '200' }
+  }, [
     h('div', { class: 'brand' }, [
       h('span', { class: 'brand-mark', html: ICONS.willow('#5a7355') }),
       h('span', {}, ['Izzy\u2019s Wanderings'])
@@ -129,7 +134,12 @@ function render() {
   const main = h('main', { class: 'app-main', id: 'main' });
   app.appendChild(main);
 
-  app.appendChild(h('nav', { class: 'tab-bar', role: 'navigation', 'aria-label': 'Main' },
+  app.appendChild(h('nav', {
+    class: 'tab-bar',
+    role: 'navigation',
+    'aria-label': 'Main',
+    style: { position: 'fixed', bottom: '0', left: '0', right: '0', zIndex: '200' }
+  },
     TABS.map(t =>
       h('button', {
         class: 'tab' + (currentTab === t.id ? ' active' : ''),
