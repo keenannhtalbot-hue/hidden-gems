@@ -52,11 +52,11 @@ function applyDayNight(force = null) {
   if (!dayLayer || !nightLayer) return;
 
   if (state === 'day') {
-    dayLayer.style.opacity = '0.85';
-    nightLayer.style.opacity = '0';
+    dayLayer.style.cssText = 'opacity: 1 !important;';
+    nightLayer.style.cssText = 'opacity: 0 !important;';
   } else {
-    dayLayer.style.opacity = '0';
-    nightLayer.style.opacity = '0.92';
+    dayLayer.style.cssText = 'opacity: 0 !important;';
+    nightLayer.style.cssText = 'opacity: 1 !important;';
   }
 }
 
@@ -177,34 +177,57 @@ function h(tag, attrs = {}, children = []) {
 // === Background + Atmosphere ===
 
 function buildBackground() {
-  const bg = h('div', { class: 'bg-layer day' });
-  const bgNight = h('div', { class: 'bg-layer night' });
+  // bg-layer with inline styles as guaranteed fallback
+  const bg = document.createElement('div');
+  bg.className = 'bg-layer day';
+  bg.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;';
+
+  const bgNight = document.createElement('div');
+  bgNight.className = 'bg-layer night';
+  bgNight.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;opacity:0;';
+
   document.body.insertBefore(bgNight, document.body.firstChild);
   document.body.insertBefore(bg, document.body.firstChild);
   applyDayNight();
 
   // Willow arch with drooping branches + leaves
-  const arch = h('div', { class: 'willow-arch', html: buildWillowArchSVG() });
+  const arch = document.createElement('div');
+  arch.className = 'willow-arch';
+  arch.style.cssText = 'position:fixed !important;top:0;left:0;right:0;height:50vh;z-index:5;pointer-events:none;overflow:hidden;';
+  arch.innerHTML = buildWillowArchSVG();
   document.body.appendChild(arch);
 
-  // MANY drifting leaves filling the screen (60 leaves)
-  const leavesHost = h('div', { class: 'leaves-host', style: { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '2' }, html: buildDriftingLeaves(60) });
+  // MANY drifting leaves filling the screen (80 leaves)
+  const leavesHost = document.createElement('div');
+  leavesHost.className = 'leaves-host';
+  leavesHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:6;';
+  leavesHost.innerHTML = buildDriftingLeaves(80);
   document.body.appendChild(leavesHost);
 
-  // Atmosphere particles (40 light motes)
-  const atmoHost = h('div', { class: 'atmosphere-host', style: { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '3' }, html: buildAtmosphereParticles(40) });
+  // Atmosphere particles (50 light motes)
+  const atmoHost = document.createElement('div');
+  atmoHost.className = 'atmosphere-host';
+  atmoHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:4;';
+  atmoHost.innerHTML = buildAtmosphereParticles(50);
   document.body.appendChild(atmoHost);
 
   // Birds drifting across the sky
-  const birdsHost = h('div', { class: 'birds-host', style: { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '4' }, html: buildBirds() });
+  const birdsHost = document.createElement('div');
+  birdsHost.className = 'birds-host';
+  birdsHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:5;';
+  birdsHost.innerHTML = buildBirds();
   document.body.appendChild(birdsHost);
 
-  // Water reflection at bottom (paintings have water)
-  const water = h('div', { class: 'water-reflection' });
+  // Water reflection at bottom
+  const water = document.createElement('div');
+  water.className = 'water-reflection';
+  water.style.cssText = 'position:fixed !important;bottom:0;left:0;right:0;height:12vh;z-index:1;pointer-events:none;';
   document.body.appendChild(water);
 
   // Grass strip at very bottom
-  const grass = h('div', { class: 'grass-strip' });
+  const grass = document.createElement('div');
+  grass.className = 'grass-strip';
+  grass.style.cssText = 'position:fixed !important;bottom:0;left:0;right:0;height:5vh;z-index:2;pointer-events:none;';
   document.body.appendChild(grass);
 }
 
