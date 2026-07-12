@@ -251,24 +251,105 @@ function boot() {
 
 function setupInstallPrompt() {
   let deferred = null;
+
+  // Standard Android/Desktop Chrome PWA install
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferred = e;
-    const prompt = document.getElementById('install-prompt');
-    if (prompt) prompt.hidden = false;
+    showInstallBanner();
   });
 
+  // When the PWA is installed, hide the banner
+  window.addEventListener('appinstalled', () => {
+    hideInstallBanner();
+    deferred = null;
+  });
+
+  // iOS Safari doesn't fire beforeinstallprompt — show manual instructions
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (isIos && !isStandalone) {
+    // Show banner after a few seconds (give the page time to render first)
+    setTimeout(() => {
+      if (!deferred && !isStandalone) showInstallBanner(true);
+    }, 3000);
+  } else if (!isStandalone) {
+    // Other browsers: show banner after 30s of interaction (Chrome requires engagement)
+    let shown = false;
+    const showOnce = () => {
+      if (shown) return;
+      shown = true;
+      showInstallBanner();
+    };
+    setTimeout(showOnce, 30000);
+    ['click', 'scroll', 'keydown'].forEach((ev) =>
+      window.addEventListener(ev, showOnce, { once: true, passive: true })
+    );
+  }
+
   document.getElementById('install-btn')?.addEventListener('click', async () => {
-    if (!deferred) return;
-    document.getElementById('install-prompt').hidden = true;
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIos) {
+      // Show iOS instructions modal
+      showIosInstructions();
+      return;
+    }
+    if (!deferred) {
+      // Fallback: instructions for browsers without beforeinstallprompt
+      showIosInstructions();
+      return;
+    }
+    hideInstallBanner();
     deferred.prompt();
-    await deferred.userChoice;
+    try {
+      await deferred.userChoice;
+    } catch (e) {}
     deferred = null;
   });
 
   document.getElementById('install-dismiss')?.addEventListener('click', () => {
-    document.getElementById('install-prompt').hidden = true;
+    hideInstallBanner();
+    deferred = null;
   });
+}
+
+function showInstallBanner(isIosFallback = false) {
+  const prompt = document.getElementById('install-prompt');
+  if (!prompt) return;
+  prompt.hidden = false;
+  if (isIosFallback) {
+    const span = prompt.querySelector('span');
+    if (span) span.textContent = 'Tap Share → "Add to Home Screen" to install';
+  }
+}
+
+function hideInstallBanner() {
+  const prompt = document.getElementById('install-prompt');
+  if (prompt) prompt.hidden = true;
+}
+
+function showIosInstructions() {
+  // Create a quick modal with iOS install instructions
+  const existing = document.getElementById('ios-install-modal');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'ios-install-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.7);display:grid;place-items:center;padding:20px;backdrop-filter:blur(8px);';
+  modal.innerHTML = `
+    <div style="background:var(--bg-0, #faf6ec);color:var(--text-bright, #2d3a2e);padding:24px;border-radius:24px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.4);font-family:system-ui,sans-serif;text-align:left;">
+      <h2 style="margin:0 0 12px;font-size:20px;">Install on your phone</h2>
+      <p style="margin:0 0 12px;font-size:14px;line-height:1.5;opacity:0.85;">To add Izzy's Wanderings to your home screen:</p>
+      <ol style="margin:0 0 20px;padding-left:20px;font-size:14px;line-height:1.7;">
+        <li>Tap the <b>Share</b> button <span style="font-size:18px;">⬆️</span> at the bottom of your browser</li>
+        <li>Scroll down and tap <b>"Add to Home Screen"</b></li>
+        <li>Tap <b>"Add"</b> to confirm</li>
+      </ol>
+      <button id="ios-modal-close" style="width:100%;padding:14px;border:none;background:var(--accent,#d4a558);color:var(--bg-0,#2d3a2e);font-size:16px;font-weight:700;border-radius:12px;cursor:pointer;">Got it</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector('#ios-modal-close')?.addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
 }
 
 function setupUnlockListener() {
@@ -320,6 +401,15 @@ function setupUnlockListener() {
 function setupNavigationListener() {
   window.addEventListener('navigate', (e) => {
     switchTab(e.detail.tab);
+  });
+}
+
+// Register service worker for PWA install + offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((err) => {
+      console.warn('SW registration failed:', err);
+    });
   });
 }
 
