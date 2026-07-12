@@ -344,7 +344,7 @@ function setupNavigationListener() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
+  document.addEventListener('DOMContentLoaded', () => { try { boot(); } catch(e) { console.error('BOOT ERROR:', e); document.body.innerHTML = '<pre style="color:red;padding:20px;">BOOT ERROR: ' + e.message + '\n' + e.stack + '</pre>'; } });
 } else {
-  boot();
+  try { boot(); } catch(e) { console.error('BOOT ERROR:', e); document.body.innerHTML = '<pre style="color:red;padding:20px;">BOOT ERROR: ' + e.message + '\n' + e.stack + '</pre>'; }
 }
