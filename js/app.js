@@ -191,12 +191,12 @@ function buildBackground() {
   // bg-layer with inline styles as guaranteed fallback
   const bg = document.createElement('div');
   bg.className = 'bg-layer day';
-  // CRITICAL: set bg image inline so it ALWAYS shows
-  bg.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;background-image:url(assets/willow-day.jpg) !important;background-size:cover !important;background-position:center !important;';
+  // CRITICAL: bg image inline + darkening overlay so UI is legible on top
+  bg.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;background-image:linear-gradient(rgba(45,58,46,0.45),rgba(45,58,46,0.45)),url(assets/willow-day.jpg) !important;background-size:cover !important;background-position:center !important;';
 
   const bgNight = document.createElement('div');
   bgNight.className = 'bg-layer night';
-  bgNight.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;opacity:0;background-image:url(assets/willow-night.jpg) !important;background-size:cover !important;background-position:center !important;';
+  bgNight.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;opacity:0;background-image:linear-gradient(rgba(15,20,40,0.55),rgba(15,20,40,0.55)),url(assets/willow-night.jpg) !important;background-size:cover !important;background-position:center !important;';
 
   document.body.insertBefore(bgNight, document.body.firstChild);
   document.body.insertBefore(bg, document.body.firstChild);
@@ -209,37 +209,37 @@ function buildBackground() {
   arch.innerHTML = buildWillowArchSVG();
   document.body.appendChild(arch);
 
-  // MANY drifting leaves filling the screen (80 leaves)
+  // MANY drifting leaves filling the screen (60 leaves - dialed back so UI is readable)
   const leavesHost = document.createElement('div');
   leavesHost.className = 'leaves-host';
-  leavesHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:6;';
-  leavesHost.innerHTML = buildDriftingLeaves(80);
+  leavesHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:6;opacity:0.5;';
+  leavesHost.innerHTML = buildDriftingLeaves(60);
   document.body.appendChild(leavesHost);
 
-  // Atmosphere particles (50 light motes)
+  // Atmosphere particles (30 light motes - subtle)
   const atmoHost = document.createElement('div');
   atmoHost.className = 'atmosphere-host';
-  atmoHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:4;';
-  atmoHost.innerHTML = buildAtmosphereParticles(50);
+  atmoHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:4;opacity:0.4;';
+  atmoHost.innerHTML = buildAtmosphereParticles(30);
   document.body.appendChild(atmoHost);
 
-  // Birds drifting across the sky
+  // Birds drifting across the sky (3 birds - subtle)
   const birdsHost = document.createElement('div');
   birdsHost.className = 'birds-host';
-  birdsHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:5;';
+  birdsHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:5;opacity:0.35;';
   birdsHost.innerHTML = buildBirds();
   document.body.appendChild(birdsHost);
 
-  // Water reflection at bottom
+  // Water reflection at bottom (subtle)
   const water = document.createElement('div');
   water.className = 'water-reflection';
-  water.style.cssText = 'position:fixed !important;bottom:0;left:0;right:0;height:12vh;z-index:1;pointer-events:none;';
+  water.style.cssText = 'position:fixed !important;bottom:0;left:0;right:0;height:8vh;z-index:1;pointer-events:none;opacity:0.6;';
   document.body.appendChild(water);
 
-  // Grass strip at very bottom
+  // Grass strip at very bottom (subtle)
   const grass = document.createElement('div');
   grass.className = 'grass-strip';
-  grass.style.cssText = 'position:fixed !important;bottom:0;left:0;right:0;height:5vh;z-index:2;pointer-events:none;';
+  grass.style.cssText = 'position:fixed !important;bottom:0;left:0;right:0;height:4vh;z-index:2;pointer-events:none;opacity:0.5;';
   document.body.appendChild(grass);
 }
 

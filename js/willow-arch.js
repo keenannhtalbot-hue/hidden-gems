@@ -36,7 +36,7 @@ export function buildAtmosphereParticles(count = 50) {
 
 export function buildBirds() {
   const birds = [];
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 3; i++) {
     const top = 5 + Math.random() * 25;
     const delay = i * 14 + Math.random() * 8;
     const dur = 35 + Math.random() * 25;
