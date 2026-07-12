@@ -11,6 +11,7 @@ import { mountStatsScreen, unmountStatsScreen } from './screens/stats.js';
 import { ICONS } from './icons.js';
 import { particles, serene, toast } from './ui.js';
 import { play } from './audio.js';
+import { buildWillowArchSVG, buildDriftingLeaves } from './willow-arch.js';
 
 let currentTab = 'surprise';
 const TABS = [
@@ -78,7 +79,7 @@ async function fetchWind() {
     return multiplier;
   } catch (e) {
     console.warn('Wind fetch failed, using fallback:', e.message);
-    // Fallback to 1.2 (slight breeze)
+    // Fallback to 1.2 (slight breeze) — 5 km/h
     windState = { speed: 1.2, raw: 5, lastUpdate: Date.now() };
     applyWindSpeed(1.2);
     updateWindPill(5);
@@ -92,13 +93,14 @@ function applyWindSpeed(multiplier) {
 
 function updateWindPill(kmh) {
   const pill = document.getElementById('wind-pill');
-  if (!pill) return;
+  const text = pill?.querySelector('.wind-text');
+  if (!pill || !text) return;
   pill.hidden = false;
   let label = 'Calm';
   if (kmh >= 30) label = 'Strong';
   else if (kmh >= 15) label = 'Breezy';
   else if (kmh >= 5) label = 'Light';
-  pill.querySelector('.wind-text').textContent = `${Math.round(kmh)} km/h · ${label}`;
+  text.textContent = `${Math.round(kmh)} km/h · ${label}`;
 }
 
 function render() {
@@ -172,7 +174,7 @@ function h(tag, attrs = {}, children = []) {
   return el;
 }
 
-// === Background ===
+// === Background + Willow arch ===
 
 function buildBackground() {
   const bg = h('div', { class: 'bg-layer day' });
@@ -180,6 +182,14 @@ function buildBackground() {
   document.body.insertBefore(bgNight, document.body.firstChild);
   document.body.insertBefore(bg, document.body.firstChild);
   applyDayNight();
+
+  // Animated willow arch (drooping branches + leaves) on top of bg
+  const arch = h('div', { class: 'willow-arch', html: buildWillowArchSVG() });
+  document.body.appendChild(arch);
+
+  // Drifting leaves falling from top
+  const leavesHost = h('div', { class: 'leaves-host', style: { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '2' }, html: buildDriftingLeaves() });
+  document.body.appendChild(leavesHost);
 }
 
 // === Splash screen ===
