@@ -35,10 +35,22 @@ function render() {
   const dist = s.distanceKm || 0;
   const hasLoc = !!s.userLocation;
 
+  // Use night photo at night
+  const heroPhoto = (s.unlocks?.activeTheme === 'midnight' || (new Date().getHours() >= 18 || new Date().getHours() < 6)) ? 'willow-night.jpg' : 'willow-day.jpg';
+
   const root = h('div', { class: 'screen-surprise' }, [
+    // HERO PHOTO BANNER — the willow photo as a focal piece at the top
+    h('div', { class: 'hero-photo-banner' }, [
+      h('div', { class: 'hero-photo', style: { backgroundImage: `url(assets/${heroPhoto})` } }),
+      h('div', { class: 'hero-overlay' }, [
+        h('div', { class: 'hero-text' }, [
+          h('h1', { class: 'hero-title' }, ['Izzy\u2019s Weeping Willow Wanderings']),
+          h('p', { class: 'hero-subtitle' }, ['Toronto · With your favorite local'])
+        ])
+      ])
+    ]),
     h('div', { class: 'surprise-hero' }, [
-      h('h1', {}, ["Izzy's Weeping Willow Wanderings"]),
-      h('p', {}, ['Wander Toronto together. Find food, art, secret views, and forgotten history. With your favorite local: Izzy.']),
+      h('p', {}, ['Wander together. Find food, art, secret views, and forgotten history.']),
       h('button', {
         class: 'blow-btn',
         onClick: handleBlow,

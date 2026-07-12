@@ -53,11 +53,11 @@ function applyDayNight(force = null) {
 
   // Use style.setProperty so we don't wipe out other inline styles
   if (state === 'day') {
-    dayLayer.style.setProperty('opacity', '1', 'important');
+    dayLayer.style.setProperty('opacity', '0.25', 'important');
     nightLayer.style.setProperty('opacity', '0', 'important');
   } else {
     dayLayer.style.setProperty('opacity', '0', 'important');
-    nightLayer.style.setProperty('opacity', '1', 'important');
+    nightLayer.style.setProperty('opacity', '0.25', 'important');
   }
 }
 
@@ -188,15 +188,15 @@ function h(tag, attrs = {}, children = []) {
 // === Background + Atmosphere ===
 
 function buildBackground() {
-  // bg-layer with inline styles as guaranteed fallback
+  // bg-layer with inline styles as guaranteed fallback - now much subtler
   const bg = document.createElement('div');
   bg.className = 'bg-layer day';
-  // CRITICAL: bg image inline + darkening overlay so UI is legible on top
-  bg.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;background-image:linear-gradient(rgba(45,58,46,0.45),rgba(45,58,46,0.45)),url(assets/willow-day.jpg) !important;background-size:cover !important;background-position:center !important;';
+  // Photo is now a SUBTLE backdrop, not dominant - hero photo lives in the page content
+  bg.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;background-image:linear-gradient(rgba(45,58,46,0.85),rgba(45,58,46,0.85)),url(assets/willow-day.jpg) !important;background-size:cover !important;background-position:center !important;opacity:0.25;';
 
   const bgNight = document.createElement('div');
   bgNight.className = 'bg-layer night';
-  bgNight.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;opacity:0;background-image:linear-gradient(rgba(15,20,40,0.55),rgba(15,20,40,0.55)),url(assets/willow-night.jpg) !important;background-size:cover !important;background-position:center !important;';
+  bgNight.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;opacity:0;background-image:linear-gradient(rgba(15,20,40,0.9),rgba(15,20,40,0.9)),url(assets/willow-night.jpg) !important;background-size:cover !important;background-position:center 25% !important;opacity:0.25;';
 
   document.body.insertBefore(bgNight, document.body.firstChild);
   document.body.insertBefore(bg, document.body.firstChild);

@@ -106,6 +106,75 @@ body {
 }
 
 /* ============================================
+   HERO PHOTO BANNER
+   The willow photo as a focal piece at the top
+   ============================================ */
+
+.hero-photo-banner {
+  position: relative;
+  width: 100%;
+  height: 35vh;
+  min-height: 240px;
+  max-height: 360px;
+  margin-top: -16px;
+  margin-left: -16px;
+  margin-right: -16px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  border-radius: 0 0 32px 32px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+
+.hero-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 25%;
+  animation: hero-breathe 12s ease-in-out infinite alternate;
+}
+
+@keyframes hero-breathe {
+  0% { transform: scale(1.05) translateY(0); }
+  100% { transform: scale(1.12) translateY(-2%); }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(45,58,46,0.3) 0%, rgba(45,58,46,0.1) 30%, rgba(45,58,46,0.4) 70%, rgba(45,58,46,0.85) 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 24px;
+}
+
+.hero-text {
+  color: white;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+}
+
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 7vw, 38px);
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 6px;
+  color: white;
+}
+
+.hero-subtitle {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.9;
+  color: white;
+}
+
+/* ============================================
    FULL-BLEED PHOTO BACKDROP
    The photo IS the app — willow art dominates
    ============================================ */
@@ -658,24 +727,8 @@ img { max-width: 100%; display: block; }
 
 .surprise-hero {
   text-align: center;
-  padding: 32px 16px 24px;
+  padding: 16px 16px 24px;
   position: relative;
-}
-
-.surprise-hero h1 {
-  font-family: var(--font-serif);
-  font-weight: 500;
-  font-style: italic;
-  font-size: clamp(30px, 8vw, 44px);
-  margin-bottom: 12px;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-  color: var(--text-bright);
-  text-shadow: 0 2px 12px rgba(255,255,255,0.5);
-}
-
-[data-theme="midnight"] .surprise-hero h1 {
-  text-shadow: 0 2px 12px rgba(0,0,0,0.7);
 }
 
 .surprise-hero p {
@@ -685,11 +738,6 @@ img { max-width: 100%; display: block; }
   font-size: 15px;
   max-width: 340px;
   margin: 0 auto;
-  text-shadow: 0 1px 6px rgba(255,255,255,0.5);
-}
-
-[data-theme="midnight"] .surprise-hero p {
-  text-shadow: 0 1px 6px rgba(0,0,0,0.7);
 }
 
 .blow-btn {
