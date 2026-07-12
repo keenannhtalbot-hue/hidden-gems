@@ -1,8 +1,8 @@
 // App root — Izzy's Weeping Willow Wanderings
+// With watercolor painted background (Izzy's real photos) + wind reactivity
 
 import {
-  initState, getState, getCurrentPlayer, applyTheme, getActiveTheme, THEMES,
-  unlockTheme
+  initState, getState, getCurrentPlayer, applyTheme, getActiveTheme, THEMES
 } from './state.js';
 import { mountSurpriseScreen, unmountSurpriseScreen, refreshSurprise } from './screens/surprise.js';
 import { mountMapScreen, unmountMapScreen, refreshMap } from './screens/map.js';
@@ -33,6 +33,74 @@ const UNMOUNTERS = {
   stats: unmountStatsScreen
 };
 
+let windState = { speed: 1, raw: 0, lastUpdate: 0 };
+
+// === Day/Night cycle ===
+
+function getDayNightState() {
+  const hour = new Date().getHours();
+  // 6am-6pm = day, 6pm-6am = night
+  if (hour >= 6 && hour < 18) return 'day';
+  return 'night';
+}
+
+function applyDayNight(force = null) {
+  const state = force || getDayNightState();
+  const dayLayer = document.querySelector('.bg-layer.day');
+  const nightLayer = document.querySelector('.bg-layer.night');
+  if (!dayLayer || !nightLayer) return;
+
+  if (state === 'day') {
+    dayLayer.style.opacity = '0.85';
+    nightLayer.style.opacity = '0';
+  } else {
+    dayLayer.style.opacity = '0';
+    nightLayer.style.opacity = '0.92';
+  }
+}
+
+// === Wind reactivity (Open-Meteo, free, no key) ===
+
+async function fetchWind() {
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=43.65&longitude=-79.38&current=wind_speed_10m,wind_gusts_10m&wind_speed_unit=kmh';
+    const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) throw new Error('bad status');
+    const data = await r.json();
+    const speed = data.current?.wind_speed_10m || 0;
+    const gusts = data.current?.wind_gusts_10m || speed;
+    const avg = (speed + gusts) / 2;
+    // Map 0-60 km/h to 0.5x-3x speed multiplier (clamped)
+    const multiplier = Math.max(0.5, Math.min(3.0, 0.5 + (avg / 60) * 2.5));
+    windState = { speed: multiplier, raw: avg, lastUpdate: Date.now() };
+    applyWindSpeed(multiplier);
+    updateWindPill(avg);
+    return multiplier;
+  } catch (e) {
+    console.warn('Wind fetch failed, using fallback:', e.message);
+    // Fallback to 1.2 (slight breeze)
+    windState = { speed: 1.2, raw: 5, lastUpdate: Date.now() };
+    applyWindSpeed(1.2);
+    updateWindPill(5);
+    return 1.2;
+  }
+}
+
+function applyWindSpeed(multiplier) {
+  document.documentElement.style.setProperty('--wind-speed', String(multiplier));
+}
+
+function updateWindPill(kmh) {
+  const pill = document.getElementById('wind-pill');
+  if (!pill) return;
+  pill.hidden = false;
+  let label = 'Calm';
+  if (kmh >= 30) label = 'Strong';
+  else if (kmh >= 15) label = 'Breezy';
+  else if (kmh >= 5) label = 'Light';
+  pill.querySelector('.wind-text').textContent = `${Math.round(kmh)} km/h · ${label}`;
+}
+
 function render() {
   const app = document.getElementById('app');
   const player = getCurrentPlayer();
@@ -40,12 +108,18 @@ function render() {
 
   app.appendChild(h('header', { class: 'app-header' }, [
     h('div', { class: 'brand' }, [
-      h('span', { class: 'brand-mark', html: ICONS.willow('#7a9573') }),
+      h('span', { class: 'brand-mark', html: ICONS.willow('#5a7355') }),
       h('span', {}, ['Izzy\u2019s Wanderings'])
     ]),
-    h('div', { class: 'player-chip', style: { '--avatar-color': player.color } }, [
-      h('span', { class: 'avatar' }, [player.name.charAt(0)]),
-      h('span', {}, [player.name])
+    h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
+      h('div', { class: 'wind-pill', id: 'wind-pill', hidden: true }, [
+        h('span', { class: 'wind-arrow' }, ['💨']),
+        h('span', { class: 'wind-text' }, ['—'])
+      ]),
+      h('div', { class: 'player-chip', style: { '--avatar-color': player.color } }, [
+        h('span', { class: 'avatar' }, [player.name.charAt(0)]),
+        h('span', {}, [player.name])
+      ])
     ])
   ]));
 
@@ -73,11 +147,9 @@ function switchTab(id) {
   UNMOUNTERS[currentTab]();
   currentTab = id;
   play('tap');
-  haptic(8);
   render();
 }
 
-// h() helper
 function h(tag, attrs = {}, children = []) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -100,17 +172,31 @@ function h(tag, attrs = {}, children = []) {
   return el;
 }
 
+// === Background ===
+
+function buildBackground() {
+  const bg = h('div', { class: 'bg-layer day' });
+  const bgNight = h('div', { class: 'bg-layer night' });
+  document.body.insertBefore(bgNight, document.body.firstChild);
+  document.body.insertBefore(bg, document.body.firstChild);
+  applyDayNight();
+}
+
 // === Splash screen ===
 
 function showSplash() {
   const splash = h('div', { id: 'splash' }, [
     h('div', { class: 'splash-content' }, [
-      h('div', { html: ICONS.willow('#7a9573') }),
-      h('div', { style: { fontFamily: 'var(--font-serif)', fontSize: '20px', color: 'var(--text-bright)', fontWeight: 500 } }, ['Izzy\u2019s Wanderings'])
+      h('div', { html: ICONS.willow('#ffffff') }),
+      h('div', { class: 'splash-title' }, ["Izzy\u2019s Wanderings"]),
+      h('div', { class: 'splash-sub' }, ['Toronto · A painted journey'])
     ])
   ]);
   document.body.appendChild(splash);
-  setTimeout(() => splash.remove(), 1700);
+  // Remove splash after animation completes
+  setTimeout(() => {
+    if (splash.parentNode) splash.remove();
+  }, 1700);
 }
 
 // === Boot ===
@@ -118,7 +204,15 @@ function showSplash() {
 function boot() {
   initState();
   applyTheme(getActiveTheme());
+  buildBackground();
   showSplash();
+  // Fetch wind in background
+  fetchWind().then(() => {
+    // Re-fetch every 30 mins
+    setInterval(fetchWind, 30 * 60 * 1000);
+  });
+  // Re-evaluate day/night every 30 mins
+  setInterval(() => applyDayNight(), 30 * 60 * 1000);
   setTimeout(() => render(), 200);
   setupInstallPrompt();
   setupUnlockListener();
@@ -153,7 +247,6 @@ function setupUnlockListener() {
     toast(`🏅 Badge unlocked: ${badge.label}!`, 'success', 4000);
     particles({ count: 30 });
     play('fanfare');
-    haptic([15, 30, 15]);
     refreshSurprise();
     refreshMap();
   });
@@ -162,7 +255,7 @@ function setupUnlockListener() {
     const { themeId } = e.detail;
     const theme = THEMES.find(t => t.id === themeId);
     if (theme) {
-      toast(`🎨 New theme unlocked: ${theme.label}! Check the Grow tab.`, 'legendary', 5000);
+      toast(`🎨 New theme unlocked: ${theme.label}!`, 'legendary', 5000);
       particles({ count: 40 });
       serene('A new season', '#d4a558');
       play('fanfare');
@@ -184,7 +277,6 @@ function setupUnlockListener() {
       particles({ count: 25 });
       play('chime');
     } else if (u.type === 'rank-up') {
-      const ranks = ['sapling','sprout','sapling2','branch','grove','forest','ancient'];
       const newRankLabel = u.to.charAt(0).toUpperCase() + u.to.slice(1);
       toast(`🌳 Rank up! You are now a ${newRankLabel}!`, 'legendary', 5000);
       serene(newRankLabel, '#d4a558');
