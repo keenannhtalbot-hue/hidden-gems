@@ -1,4 +1,4 @@
-// Cosmic UI helpers — toast, confetti, supernova, h()
+// UI helpers — toast, particles (theme-aware), serene text, h(), confetti, haptic
 
 export function toast(msg, kind = 'info', dur = 3000) {
   const host = document.getElementById('toast-host');
@@ -13,48 +13,70 @@ export function toast(msg, kind = 'info', dur = 3000) {
   }, dur);
 }
 
-export function confetti(opts = {}) {
-  const colors = opts.colors || ['#FFD93D', '#FF6B6B', '#4ECDC4', '#A78BFA', '#F472B6', '#7dd3fc'];
-  const count = opts.count || 40;
+// Theme-aware particle system — replaces confetti for Legendary reveals
+export function particles(opts = {}) {
+  const theme = document.documentElement.getAttribute('data-theme') || 'willow';
+  const shape = opts.shape || themeParticle(theme);
+  const count = opts.count || 50;
+  const color = opts.color || 'currentColor';
   const host = document.createElement('div');
-  host.className = 'confetti-host';
+  host.className = 'particle-host';
   document.body.appendChild(host);
   for (let i = 0; i < count; i++) {
     const piece = document.createElement('div');
-    piece.className = 'confetti';
-    piece.style.left = (50 + (Math.random() - 0.5) * 8) + '%';
-    piece.style.top = '40%';
-    piece.style.background = colors[i % colors.length];
-    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-    const distance = 200 + Math.random() * 280;
-    piece.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
-    piece.style.setProperty('--ty', (Math.sin(angle) * distance + 400) + 'px');
-    piece.style.setProperty('--rot', (Math.random() * 1080 - 540) + 'deg');
+    piece.className = `particle ${shape}`;
+    if (shape === 'firefly') {
+      piece.style.background = opts.color || '#f0d878';
+      piece.style.color = opts.color || '#f0d878';
+    }
+    piece.style.left = (Math.random() * 100) + '%';
+    piece.style.top = '-20px';
+    const tx = (Math.random() - 0.5) * 200 + 'px';
+    const ty = (window.innerHeight + 100) + 'px';
+    const rot = (Math.random() * 720 - 360) + 'deg';
+    piece.style.setProperty('--tx', tx);
+    piece.style.setProperty('--ty', ty);
+    piece.style.setProperty('--rot', rot);
+    piece.style.animationDelay = (Math.random() * 800) + 'ms';
+    piece.style.animationDuration = (3000 + Math.random() * 3000) + 'ms';
     host.appendChild(piece);
   }
-  setTimeout(() => host.remove(), 1600);
+  setTimeout(() => host.remove(), 6000);
 }
 
-// Supernova burst — used for Legendary reveals
-export function supernova() {
-  const host = document.createElement('div');
-  host.className = 'supernova-host';
-  document.body.appendChild(host);
-  // Flash
-  const flash = document.createElement('div');
-  flash.className = 'supernova-flash';
-  host.appendChild(flash);
-  // Rings
-  for (let i = 0; i < 3; i++) {
-    const ring = document.createElement('div');
-    ring.className = 'supernova-ring';
-    ring.style.animationDelay = (i * 200) + 'ms';
-    host.appendChild(ring);
+function themeParticle(theme) {
+  return {
+    willow: 'willow',
+    autumn: 'maple',
+    blossom: 'petal',
+    winter: 'snowflake',
+    midnight: 'firefly'
+  }[theme] || 'willow';
+}
+
+// Serene text — slides down from top for Legendary reveals
+export function serene(text, color) {
+  const el = document.createElement('div');
+  el.className = 'serene-text';
+  el.textContent = text;
+  el.style.setProperty('--serene-color', color || 'var(--rarity-legendary)');
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// Keep old confetti for compatibility (uses particle system now)
+export function confetti(opts = {}) {
+  particles(opts);
+}
+
+// Soft haptic
+export function haptic(pattern = 10) {
+  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    try { navigator.vibrate(pattern); } catch {}
   }
-  confetti({ count: 60 });
-  setTimeout(() => host.remove(), 1400);
 }
 
+// h() helper
 export function h(tag, attrs = {}, children = []) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -80,11 +102,4 @@ export function h(tag, attrs = {}, children = []) {
 
 export function clear(el) {
   while (el.firstChild) el.removeChild(el.firstChild);
-}
-
-// Tiny haptic feedback (vibrate if available, otherwise no-op)
-export function haptic(pattern = 10) {
-  if (typeof navigator !== 'undefined' && navigator.vibrate) {
-    try { navigator.vibrate(pattern); } catch {}
-  }
 }

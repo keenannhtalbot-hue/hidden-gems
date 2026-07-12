@@ -1,7 +1,7 @@
 {
-  "name": "Izzy's Interstellar Adventures",
-  "short_name": "Izzy",
-  "description": "Toronto treasure hunts through the stars — with your favorite local Izzy",
+  "name": "Izzy's Weeping Willow Wanderings",
+  "short_name": "Izzy's Wanderings",
+  "description": "Wander Toronto through willow themes with your favorite local Izzy",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

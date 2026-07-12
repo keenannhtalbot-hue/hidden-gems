@@ -1,6 +1,6 @@
-// Add-your-own-gem screen — cosmic form
+// Add-your-own-gem screen — willow themed
 
-import { h, toast, confetti, supernova, haptic } from '../ui.js';
+import { h, toast, particles, serene, haptic } from '../ui.js';
 import { ICONS } from '../icons.js';
 import { addCustomGem, getCategory, getCurrentPlayer, requestUserLocation } from '../state.js';
 import { play } from '../audio.js';
@@ -28,8 +28,8 @@ function render() {
   const root = h('div', { class: 'screen-add' }, [
     h('div', { style: { paddingTop: '8px' } }, [
       h('div', { class: 'surprise-hero', style: { padding: '16px 0 8px' } }, [
-        h('h1', { style: { fontSize: 'clamp(26px,7vw,32px)' } }, ['Plot a New Planet']),
-        h('p', {}, ['Found somewhere cool? Beam it onto the map for everyone.'])
+        h('h1', { style: { fontSize: 'clamp(28px,7vw,34px)' } }, ['Plant a New Seed']),
+        h('p', {}, ['Found somewhere special? Add it to the map for everyone.'])
       ]),
       buildForm()
     ])
@@ -39,11 +39,11 @@ function render() {
 
 function buildForm() {
   const cats = {
-    food: ICONS.fork('#FF6B6B'),
-    art: ICONS.brush('#4ECDC4'),
-    view: ICONS.eye('#FFD93D'),
-    shop: ICONS.shop('#A78BFA'),
-    history: ICONS.column('#F472B6')
+    food: ICONS.fork('var(--cat-food)'),
+    art: ICONS.brush('var(--cat-art)'),
+    view: ICONS.eye('var(--cat-view)'),
+    shop: ICONS.shop('var(--cat-shop)'),
+    history: ICONS.column('var(--cat-history)')
   };
 
   const form = h('form', {
@@ -52,10 +52,7 @@ function buildForm() {
   }, [
     h('div', { class: 'form-group' }, [
       h('label', {}, ['Name of this place']),
-      h('input', {
-        type: 'text', name: 'name', required: true,
-        placeholder: 'E.g. Randy\'s Roti'
-      })
+      h('input', { type: 'text', name: 'name', required: true, placeholder: 'E.g. Randy\'s Roti' })
     ]),
     h('div', { class: 'form-group' }, [
       h('label', {}, ['Category']),
@@ -68,11 +65,8 @@ function buildForm() {
             style: { '--cat-color': getCategory(catId).color },
             onClick: () => {
               chosenCategory = catId;
-              form.querySelectorAll('.cat-pick-btn').forEach(b => {
-                b.classList.toggle('active', b.dataset.cat === catId);
-              });
-              play('click');
-              haptic(8);
+              form.querySelectorAll('.cat-pick-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === catId));
+              play('click'); haptic(8);
             }
           }, [
             h('span', { class: 'cat-icon', html: iconSvg }),
@@ -83,10 +77,7 @@ function buildForm() {
     ]),
     h('div', { class: 'form-group' }, [
       h('label', {}, ['One-liner — what makes it special?']),
-      h('input', {
-        type: 'text', name: 'blurb', required: true,
-        placeholder: 'The best peameal bacon sandwich in the city'
-      })
+      h('input', { type: 'text', name: 'blurb', required: true, placeholder: 'The best peameal bacon sandwich in the city' })
     ]),
     h('div', { class: 'form-group' }, [
       h('label', {}, ['Tip (optional)']),
@@ -94,17 +85,9 @@ function buildForm() {
     ]),
     h('div', { class: 'form-group' }, [
       h('label', {}, ['Photo (optional)']),
-      h('label', { class: 'photo-pick', 'aria-label': 'Add a photo' }, [
-        h('input', {
-          type: 'file',
-          accept: 'image/*',
-          capture: 'environment',
-          style: { display: 'none' },
-          onChange: handlePhoto
-        }),
-        h('div', {}, [
-          photoDataUrl ? 'Tap to change photo' : '📷  Tap to snap or pick a photo'
-        ])
+      h('label', { class: 'photo-pick' }, [
+        h('input', { type: 'file', accept: 'image/*', capture: 'environment', style: { display: 'none' }, onChange: handlePhoto }),
+        photoDataUrl ? 'Tap to change photo' : '📷  Tap to snap or pick a photo'
       ])
     ]),
     h('div', { class: 'form-group' }, [
@@ -113,17 +96,15 @@ function buildForm() {
         h('span', { class: 'coords' }, [
           coords ? `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}` : 'No location yet'
         ]),
-        h('button', {
-          type: 'button',
-          onClick: handleGetLocation
-        }, [gettingLoc ? '...' : coords ? '↻ Re-pick' : '📍 Use my location'])
+        h('button', { type: 'button', onClick: handleGetLocation }, [
+          gettingLoc ? '...' : coords ? '↻ Re-pick' : '📍 Use my location'
+        ])
       ])
     ]),
-    h('button', { type: 'submit', class: 'submit-btn' }, ['💎 Beam it onto the map'])
+    h('button', { type: 'submit', class: 'submit-btn' }, ['🌱 Plant on the map'])
   ]);
 
   let chosenCategory = 'food';
-  // Mark first button active
   setTimeout(() => {
     const first = form.querySelector('.cat-pick-btn');
     if (first && !form.querySelector('.cat-pick-btn.active')) first.classList.add('active');
@@ -134,14 +115,7 @@ function buildForm() {
     pick.innerHTML = '';
     const img = h('img', { src: photoDataUrl, alt: 'Preview' });
     pick.appendChild(img);
-    // Re-attach hidden file input
-    const input = h('input', {
-      type: 'file',
-      accept: 'image/*',
-      capture: 'environment',
-      style: { display: 'none' },
-      onChange: handlePhoto
-    });
+    const input = h('input', { type: 'file', accept: 'image/*', capture: 'environment', style: { display: 'none' }, onChange: handlePhoto });
     pick.appendChild(input);
   }
 
@@ -155,8 +129,7 @@ function handlePhoto(e) {
   const reader = new FileReader();
   reader.onload = () => {
     photoDataUrl = reader.result;
-    play('pop');
-    haptic(10);
+    play('pop'); haptic(10);
     render();
   };
   reader.onerror = () => toast('Could not read photo', 'error');
@@ -164,10 +137,7 @@ function handlePhoto(e) {
 }
 
 async function handleGetLocation() {
-  if (!navigator.geolocation) {
-    promptForManualCoords();
-    return;
-  }
+  if (!navigator.geolocation) { promptForManualCoords(); return; }
   gettingLoc = true;
   play('click');
   render();
@@ -175,8 +145,7 @@ async function handleGetLocation() {
     const loc = await requestUserLocation();
     coords = { lat: loc.lat, lng: loc.lng };
     gettingLoc = false;
-    play('pop');
-    haptic(15);
+    play('pop'); haptic(15);
     toast('📍 Got your location!', 'success');
     render();
   } catch (err) {
@@ -191,46 +160,35 @@ function promptForManualCoords() {
   const input = prompt('Enter latitude,longitude (or leave blank):', '43.65,-79.38');
   if (!input) return;
   const [lat, lng] = input.split(',').map(s => parseFloat(s.trim()));
-  if (!isFinite(lat) || !isFinite(lng)) {
-    toast('Invalid coordinates', 'error');
-    return;
-  }
+  if (!isFinite(lat) || !isFinite(lng)) { toast('Invalid coordinates', 'error'); return; }
   coords = { lat, lng };
   render();
 }
 
 function handleSubmit() {
-  if (!coords) {
-    toast('Add a location first', 'warn');
-    haptic([10, 30, 10]);
-    return;
-  }
+  if (!coords) { toast('Add a location first', 'warn'); haptic([10, 30, 10]); return; }
   const form = mainEl.querySelector('form');
   const fd = new FormData(form);
   const name = fd.get('name')?.trim();
   const blurb = fd.get('blurb')?.trim();
   const tip = fd.get('tip')?.trim();
   const cat = form.querySelector('.cat-pick-btn.active')?.dataset.cat;
-  if (!name || !blurb || !cat) {
-    toast('Fill in name, category, and one-liner', 'warn');
-    haptic([10, 30, 10]);
-    return;
-  }
+  if (!name || !blurb || !cat) { toast('Fill in name, category, and one-liner', 'warn'); haptic([10, 30, 10]); return; }
   const player = getCurrentPlayer();
   const gem = addCustomGem({
     name, blurb, tip, category: cat,
     lat: coords.lat, lng: coords.lng,
-    address: `Plotted by ${player.name}`,
-    photo: photoDataUrl,
-    custom: true
+    address: `Planted by ${player.name}`,
+    photo: photoDataUrl, custom: true
   });
   play('fanfare');
-  supernova();
+  particles({ count: 50 });
+  serene('Planted', '#7a9573');
   haptic([20, 40, 20]);
-  toast(`💎 "${gem.name}" beamed onto the map!`, 'success', 4000);
+  toast(`🌱 "${gem.name}" planted on the map!`, 'success', 4000);
   photoDataUrl = null;
   coords = null;
   setTimeout(() => {
     window.dispatchEvent(new CustomEvent('navigate', { detail: { tab: 'surprise' } }));
-  }, 1400);
+  }, 1500);
 }

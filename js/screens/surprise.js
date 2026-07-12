@@ -1,18 +1,20 @@
-// Surprise screen — cosmic, with rocket, distance slider, legendary handling
+// Surprise screen — weeping willow theme, quests, photo evidence, leaf particles
 
-import { h, toast, confetti, supernova, haptic } from '../ui.js';
+import { h, toast, particles, serene, haptic } from '../ui.js';
 import { ICONS } from '../icons.js';
 import {
   getState, getCategory, allGems, toggleVisited, isVisited, getNote, setNote,
   toggleFilter, getCurrentPlayer, getPlayer, getScore, pickGem,
-  setDistance, requestUserLocation, getRarity
+  setDistance, requestUserLocation, getRarity, getQuestForGem,
+  setPhoto, getGemPhoto, QUESTS
 } from '../state.js';
 import { play } from '../audio.js';
 
 let currentGem = null;
 let mounted = false;
 let mainEl = null;
-let distanceTouching = false;
+let currentQuest = null;
+let questTimers = {}; // questId -> { startTs, durationSec }
 
 export function mountSurpriseScreen(main) {
   mainEl = main;
@@ -23,6 +25,7 @@ export function mountSurpriseScreen(main) {
 export function unmountSurpriseScreen() {
   mounted = false;
   currentGem = null;
+  currentQuest = null;
 }
 
 function render() {
@@ -34,24 +37,24 @@ function render() {
 
   const root = h('div', { class: 'screen-surprise' }, [
     h('div', { class: 'surprise-hero' }, [
-      h('h1', {}, ["Izzy's Interstellar Adventures"]),
-      h('p', {}, ['Beam across Toronto. Find weird food, secret views, murals, and forgotten history. With your favorite local: Izzy.']),
+      h('h1', {}, ["Izzy's Weeping Willow Wanderings"]),
+      h('p', {}, ['Wander Toronto together. Find food, art, secret views, and forgotten history. With your favorite local: Izzy.']),
       h('button', {
-        class: 'surprise-btn',
-        onClick: handleSurprise,
-        'aria-label': 'Pick a random gem'
+        class: 'blow-btn',
+        onClick: handleBlow,
+        'aria-label': 'Find a random gem'
       }, [
-        h('span', { class: 'rocket-icon', html: ICONS.rocket('#0c0c20') }),
-        h('span', {}, ['Beam Me Up'])
+        h('span', { class: 'wind-icon', html: ICONS.wind('#0c0c20') }),
+        h('span', {}, ['Blow Me Away'])
       ])
     ]),
     h('div', { class: 'filter-bar', role: 'toolbar', 'aria-label': 'Filter by category' },
       renderCategoryFilters(cats)
     ),
-    h('div', { class: 'distance-slider-block', style: { '--radar-color': dist > 0 ? '#4ECDC4' : '#FFD93D' } }, [
+    h('div', { class: 'distance-slider-block' }, [
       h('div', { class: 'distance-header' }, [
         h('div', { class: 'distance-label' }, [
-          h('span', { class: 'radar-icon', html: ICONS.radar(dist > 0 ? '#4ECDC4' : '#FFD93D') }),
+          h('span', { class: 'radar-icon', html: ICONS.radar('var(--accent)') }),
           h('span', {}, ['Within'])
         ]),
         h('div', { class: 'distance-value' }, [
@@ -61,7 +64,7 @@ function render() {
       h('input', {
         type: 'range', class: 'distance-slider',
         min: 0, max: 25, step: 0.5, value: dist,
-        'aria-label': 'Distance from your location in kilometers',
+        'aria-label': 'Distance from your location',
         onInput: handleDistanceChange
       }),
       h('div', { class: 'distance-legend' }, [
@@ -78,9 +81,9 @@ function render() {
       }, ['📍 Use my location for distance']) : null
     ]),
     currentGem ? renderGemCard(currentGem) : h('div', { class: 'empty' }, [
-      h('div', { class: 'icon', html: ICONS.rocket('#FFD93D') }),
-      h('h3', {}, ['Ready to explore the cosmos?']),
-      h('p', {}, ['Hit "Beam Me Up" to be teleported to a random Toronto gem. Filter by category or set a distance from you.'])
+      h('div', { class: 'icon', html: ICONS.willow('var(--accent)') }),
+      h('h3', {}, ['Ready to wander?']),
+      h('p', {}, ['Hit "Blow Me Away" and let the wind pick your next Toronto gem. Filter by category or set a distance from you.'])
     ])
   ]);
   mainEl.replaceChildren(root);
@@ -88,11 +91,11 @@ function render() {
 
 function renderCategoryFilters(activeCats) {
   const cats = {
-    food:    { label: 'Food',    icon: ICONS.fork('#FF6B6B') },
-    art:     { label: 'Art',     icon: ICONS.brush('#4ECDC4') },
-    view:    { label: 'Views',   icon: ICONS.eye('#FFD93D') },
-    shop:    { label: 'Shops',   icon: ICONS.shop('#A78BFA') },
-    history: { label: 'History', icon: ICONS.column('#F472B6') }
+    food:    { label: 'Food',    icon: ICONS.fork('var(--cat-food)') },
+    art:     { label: 'Art',     icon: ICONS.brush('var(--cat-art)') },
+    view:    { label: 'Views',   icon: ICONS.eye('var(--cat-view)') },
+    shop:    { label: 'Shops',   icon: ICONS.shop('var(--cat-shop)') },
+    history: { label: 'History', icon: ICONS.column('var(--cat-history)') }
   };
   return Object.entries(cats).map(([id, info]) =>
     h('button', {
@@ -110,18 +113,18 @@ function renderGemCard(gem) {
   const cat = getCategory(gem.category);
   const rarity = getRarity(gem.rarity);
   const visited = isVisited(gem.id);
-  const note = getNote(gem.id);
+  const photo = getGemPhoto(gem.id);
   const player = getCurrentPlayer();
-  const rarityIconSvg = ICONS[`rarity${gem.rarity}`]?.(rarity.color) || ICONS.rarity1(rarity.color);
+  const quest = getQuestForGem(gem);
 
   return h('article', {
     class: 'gem-card',
     style: {
       '--cat-color': cat?.color,
-      '--cat-glow': cat?.glow
+      '--cat-glow': (cat?.color || '#d4a558') + '40'
     }
   }, [
-    gem.rarity === 5 ? h('div', { class: 'legend-tag' }, ['⭐ Most locals don\'t know this exists']) : null,
+    gem.rarity === 5 ? h('div', { class: 'legend-tag' }, ['🌳 A place most will never find']) : null,
     h('div', { class: 'gem-card-header' }, [
       h('span', { class: 'category-badge' }, [
         h('span', { class: 'cat-icon', html: ICONS[cat?.icon]?.(cat.color) || '' }),
@@ -131,30 +134,29 @@ function renderGemCard(gem) {
         class: 'rarity-badge ' + (gem.rarity === 5 ? 'legendary' : gem.rarity === 4 ? 'epic' : ''),
         style: { '--rarity-color': rarity.color }
       }, [
-        h('span', { class: 'rarity-icon', html: rarityIconSvg }),
+        h('span', { class: 'rarity-icon', html: ICONS[`rarity${gem.rarity}`]?.(rarity.color) || ICONS.rarity1(rarity.color) }),
         rarity.label
       ])
     ]),
     h('h2', {}, [gem.name]),
     h('p', { class: 'blurb' }, [gem.blurb]),
     gem.tip ? h('div', { class: 'tip' }, [
-      h('div', { class: 'tip-label' }, [
-        h('span', { html: ICONS.sparkle('#FFD93D') }),
-        h('span', {}, ['Izzy-grade tip'])
-      ]),
+      h('div', { class: 'tip-label' }, ['Izzy-grade tip']),
       gem.tip
     ]) : null,
     h('div', { class: 'meta' }, [
       gem.address ? h('span', {}, ['📍 ' + gem.address]) : null,
       renderDistance(gem)
     ]),
+    quest ? renderQuest(quest, gem) : null,
+    renderPhotoEvidence(gem, photo),
     h('div', { class: 'actions' }, [
       h('button', {
         class: 'action-btn ' + (visited ? 'visited' : 'primary'),
         onClick: () => handleVisit(gem),
         'aria-pressed': visited ? 'true' : 'false'
       }, [
-        h('span', { class: 'btn-icon', html: visited ? ICONS.check('#0c0c20') : ICONS.sparkle('#0c0c20') }),
+        h('span', { class: 'btn-icon', html: visited ? ICONS.check('white') : ICONS.sparkle('#0c0c20') }),
         visited ? ' Visited by ' + (getPlayer(getState().visited[gem.id]?.by)?.name || '?') : ' Mark Visited'
       ]),
       h('button', {
@@ -162,12 +164,12 @@ function renderGemCard(gem) {
         onClick: () => openInMaps(gem)
       }, [
         h('span', { class: 'btn-icon', html: ICONS.compass('currentColor') }),
-        'Open in Maps'
+        'Maps'
       ])
     ]),
     h('div', { class: 'notes-block' }, [
       h('label', {}, [
-        h('span', { class: 'label-icon', html: ICONS.note('#F472B6') }),
+        h('span', { class: 'label-icon', html: ICONS.note('var(--cat-history)') }),
         player.name + "'s note"
       ]),
       h('textarea', {
@@ -179,10 +181,76 @@ function renderGemCard(gem) {
   ]);
 }
 
+function renderQuest(quest, gem) {
+  const isTimed = quest.type === 'timed';
+  const isSpot = quest.type === 'spot';
+  const isStory = quest.type === 'story';
+
+  return h('div', { class: 'quest-card' }, [
+    h('div', { class: 'quest-header' }, [
+      h('span', { class: 'quest-label' }, [
+        h('span', { style: { marginRight: '4px' } }, [isTimed ? '⏱️' : isSpot ? '🎯' : isStory ? '🎤' : '📜']),
+        quest.type.toUpperCase()
+      ]),
+      isTimed ? h('span', { class: 'quest-timer' }, [`${Math.floor(quest.duration / 60)}:${String(quest.duration % 60).padStart(2, '0')}`]) : null
+    ]),
+    h('div', { class: 'quest-title' }, [quest.title]),
+    h('div', { class: 'quest-desc' }, [quest.desc]),
+    isSpot ? h('div', { class: 'quest-subtask-list' },
+      quest.subtasks.map((s, i) =>
+        h('div', {
+          class: 'quest-subtask',
+          onClick: (e) => { e.currentTarget.classList.toggle('done'); haptic(10); }
+        }, [
+          h('div', { class: 'check', html: ICONS.check('white') }),
+          h('div', { class: 'subtask-text' }, [s])
+        ])
+      )
+    ) : null,
+    isTimed ? h('button', {
+      class: 'action-btn secondary',
+      style: { width: '100%' },
+      onClick: () => { toast(`⏱️ Quest timer started: ${quest.duration}s`, 'info', 2000); haptic([15, 30, 15]); }
+    }, [
+      h('span', { class: 'btn-icon', html: ICONS.camera('currentColor') }),
+      'Start Timer + Take Photo'
+    ]) : null,
+    isStory ? h('button', {
+      class: 'action-btn secondary',
+      style: { width: '100%' },
+      onClick: () => toast('🎤 Voice notes coming soon — for now use the text note below!', 'warn', 3000)
+    }, [
+      h('span', { class: 'btn-icon', html: ICONS.note('currentColor') }),
+      'Record voice note'
+    ]) : null
+  ]);
+}
+
+function renderPhotoEvidence(gem, existingPhoto) {
+  return h('div', { class: 'photo-evidence' }, [
+    h('div', { class: 'photo-evidence-label' }, [
+      h('span', { html: ICONS.camera('var(--accent)') }),
+      'Photo evidence required'
+    ]),
+    h('label', { class: 'photo-evidence-area' }, [
+      h('input', {
+        type: 'file',
+        accept: 'image/*',
+        capture: 'environment',
+        style: { display: 'none' },
+        onChange: (e) => handlePhotoUpload(gem, e)
+      }),
+      existingPhoto ? h('img', { src: existingPhoto, alt: 'Photo proof' }) : h('div', {}, ['📷 Tap to take your evidence photo'])
+    ]),
+    h('div', { class: 'photo-evidence-status' + (existingPhoto ? ' has-photo' : '') }, [
+      existingPhoto ? '✓ Photo captured — you can mark this gem as visited' : 'No photo yet — visit unlocks after you take one'
+    ])
+  ]);
+}
+
 function renderDistance(gem) {
   const s = getState();
   if (!s.userLocation || !gem.lat) return null;
-  // Use haversine inline (avoids extra import)
   const R = 6371, toRad = d => d * Math.PI / 180;
   const dLat = toRad(gem.lat - s.userLocation.lat);
   const dLng = toRad(gem.lng - s.userLocation.lng);
@@ -191,55 +259,82 @@ function renderDistance(gem) {
   return h('span', {}, ['📏 ' + km.toFixed(1) + ' km']);
 }
 
-function handleSurprise() {
-  const btn = document.querySelector('.surprise-btn');
-  if (btn) { btn.classList.add('spinning'); btn.disabled = true; }
+// === Handlers ===
+
+function handleBlow() {
+  const btn = document.querySelector('.blow-btn');
+  if (btn) { btn.classList.add('blowing'); btn.disabled = true; }
   play('whoosh');
   haptic(15);
 
   setTimeout(() => {
     const gem = pickGem();
     if (!gem) {
-      toast('No gems match your filters. Try enabling a category or widening distance.', 'warn');
-      if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
+      toast('No gems match your filters. Try widening.', 'warn');
+      if (btn) { btn.classList.remove('blowing'); btn.disabled = false; }
       return;
     }
     currentGem = gem;
+    currentQuest = getQuestForGem(gem);
+
     const isLegendary = gem.rarity === 5;
     const isEpic = gem.rarity === 4;
 
     if (isLegendary) {
       play('fanfare');
-      supernova();
+      // Serene text slides down from top
+      const theme = document.documentElement.getAttribute('data-theme') || 'willow';
+      const sereneColors = {
+        willow: '#7a9573', autumn: '#c4622c', blossom: '#d87090', winter: '#88a4b2', midnight: '#f0d878'
+      };
+      serene('Serene', sereneColors[theme]);
+      // Theme particles drift across
+      setTimeout(() => particles({ count: 80 }), 400);
       haptic([20, 60, 20]);
     } else if (isEpic) {
       play('sparkle');
-      confetti({ count: 30 });
+      particles({ count: 35 });
       haptic(20);
     } else {
       play('sparkle');
       haptic(10);
     }
     render();
-    if (btn) { btn.classList.remove('spinning'); btn.disabled = false; }
+    if (btn) { btn.classList.remove('blowing'); btn.disabled = false; }
     setTimeout(() => {
       const card = document.querySelector('.gem-card');
       card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 60);
-  }, 600);
+    }, 80);
+  }, 700);
 }
 
 function handleVisit(gem) {
   const visited = isVisited(gem.id);
+  const photo = getGemPhoto(gem.id);
+
+  // Photo required
+  if (!visited && !photo) {
+    toast('📷 Take a photo first — your evidence is required', 'warn');
+    haptic([10, 30, 10]);
+    return;
+  }
+
   toggleVisited(gem.id);
   play(visited ? 'click' : 'chime');
+
   if (!visited) {
     const cat = getCategory(gem.category);
     const rar = getRarity(gem.rarity);
     const pts = (cat?.points || 10) * (rar.points);
-    confetti({ count: gem.rarity === 5 ? 60 : 36 });
     if (gem.rarity === 5) {
-      supernova();
+      const theme = document.documentElement.getAttribute('data-theme') || 'willow';
+      const sereneColors = {
+        willow: '#7a9573', autumn: '#c4622c', blossom: '#d87090', winter: '#88a4b2', midnight: '#f0d878'
+      };
+      serene('Discovered', sereneColors[theme]);
+      setTimeout(() => particles({ count: 80 }), 300);
+    } else {
+      particles({ count: 30 });
     }
     haptic([15, 30, 15]);
     toast(`+${pts} points for ${getCurrentPlayer().name}!`, 'success');
@@ -250,6 +345,22 @@ function handleVisit(gem) {
   render();
 }
 
+function handlePhotoUpload(gem, e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { toast('Photo too large (max 5MB)', 'warn'); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    setPhoto(gem.id, reader.result);
+    play('pop');
+    haptic([15, 30, 15]);
+    toast('📷 Photo captured!', 'success');
+    render();
+  };
+  reader.onerror = () => toast('Could not read photo', 'error');
+  reader.readAsDataURL(file);
+}
+
 function handleNoteInput(gemId, value) {
   clearTimeout(handleNoteInput._t);
   handleNoteInput._t = setTimeout(() => setNote(gemId, value), 400);
@@ -258,13 +369,8 @@ function handleNoteInput(gemId, value) {
 function handleDistanceChange(e) {
   const v = parseFloat(e.target.value);
   setDistance(v);
-  // Don't full-render on every slider tick — just update the label color
-  const block = document.querySelector('.distance-slider-block');
-  const valEl = block?.querySelector('.distance-value');
-  const radarIcon = block?.querySelector('.radar-icon');
-  if (block) block.style.setProperty('--radar-color', v > 0 ? '#4ECDC4' : '#FFD93D');
+  const valEl = document.querySelector('.distance-value');
   if (valEl) valEl.textContent = v === 0 ? '∞ Anywhere' : `${v.toFixed(1)} km`;
-  if (radarIcon) radarIcon.innerHTML = ICONS.radar(v > 0 ? '#4ECDC4' : '#FFD93D');
 }
 
 async function handleGetLocation() {
@@ -276,15 +382,14 @@ async function handleGetLocation() {
     toast('📍 Got your location — distance slider is live!', 'success');
     render();
   } catch (e) {
-    toast('Could not get location — check browser permissions', 'warn');
+    toast('Could not get location — check permissions', 'warn');
   }
 }
 
 function openInMaps(gem) {
   play('click');
   haptic(8);
-  const url = `https://www.google.com/maps/search/?api=1&query=${gem.lat},${gem.lng}`;
-  window.open(url, '_blank', 'noopener');
+  window.open(`https://www.google.com/maps/search/?api=1&query=${gem.lat},${gem.lng}`, '_blank', 'noopener');
 }
 
 export function refreshSurprise() {
