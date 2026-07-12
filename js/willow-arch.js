@@ -1,6 +1,11 @@
 // Pure falling leaves + birds + atmosphere - no SVG willow
 // The PHOTO is the willow art. This just adds motion around it.
 
+// Stub willow arch SVG (kept for compatibility — photo is the real art)
+export function buildWillowArchSVG() {
+  return `<svg viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg"></svg>`;
+}
+
 export function buildDriftingLeaves(count = 80) {
   const leaves = [];
   for (let i = 0; i < count; i++) {
