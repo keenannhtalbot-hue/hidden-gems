@@ -294,17 +294,17 @@ function setupInstallPrompt() {
       showIosInstructions();
       return;
     }
-    if (!deferred) {
-      // Fallback: instructions for browsers without beforeinstallprompt
+    if (deferred) {
+      hideInstallBanner();
+      deferred.prompt();
+      try {
+        await deferred.userChoice;
+      } catch (e) {}
+      deferred = null;
+    } else {
+      // Fallback: show instructions modal so user can still install via menu
       showIosInstructions();
-      return;
     }
-    hideInstallBanner();
-    deferred.prompt();
-    try {
-      await deferred.userChoice;
-    } catch (e) {}
-    deferred = null;
   });
 
   document.getElementById('install-dismiss')?.addEventListener('click', () => {
