@@ -4,10 +4,10 @@
 import {
   initState, getState, getCurrentPlayer, applyTheme, getActiveTheme, THEMES
 } from './state.js';
-import { mountSurpriseScreen, unmountSurpriseScreen, refreshSurprise } from './screens/surprise.js';
-import { mountMapScreen, unmountMapScreen, refreshMap } from './screens/map.js';
-import { mountAddScreen, unmountAddScreen } from './screens/add.js';
-import { mountStatsScreen, unmountStatsScreen } from './screens/stats.js';
+import { mountSurpriseScreen, unmountSurpriseScreen, refreshSurprise } from './screens/surprise.js?v=20';
+import { mountMapScreen, unmountMapScreen, refreshMap } from './screens/map.js?v=20';
+import { mountAddScreen, unmountAddScreen } from './screens/add.js?v=20';
+import { mountStatsScreen, unmountStatsScreen } from './screens/stats.js?v=20';
 import { ICONS } from './icons.js';
 import { particles, serene, toast } from './ui.js';
 import { play } from './audio.js';
