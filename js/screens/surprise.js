@@ -104,10 +104,10 @@ function render() {
     h('div', { class: 'filter-bar', role: 'toolbar', 'aria-label': 'Filter by category' },
       renderCategoryFilters(cats)
     ),
-    h('div', { class: 'distance-slider-block' }, [
+    h('div', { class: 'distance-slider-block', style: { maxWidth: '100%', overflow: 'hidden' } }, [
       h('div', { class: 'distance-header' }, [
         h('div', { class: 'distance-label' }, [
-          h('span', { class: 'radar-icon', html: ICONS.radar('var(--accent)') }),
+          h('span', { class: 'radar-icon', style: { width: '18px', height: '18px', display: 'inline-block', flexShrink: 0 }, html: ICONS.radar('var(--accent)') }),
           h('span', {}, ['Within'])
         ]),
         h('div', { class: 'distance-value' }, [
