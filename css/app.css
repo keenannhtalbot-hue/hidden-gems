@@ -5,7 +5,6 @@
    ============================================ */
 
 :root, [data-theme="willow"] {
-  /* Surfaces — watercolor transparency */
   --bark-deep: #2d3a2e;
   --bark-mid: #3d4f3d;
   --leaf-sage: #7a9573;
@@ -16,35 +15,27 @@
   --cream-warm: #f0e8d0;
   --sun-gold: #e8c878;
   --sun-amber: #d4a558;
-
-  /* Text — painted ink */
   --text-bright: #2d3a2e;
   --text-1: #3d4f3d;
   --text-2: #6a7868;
   --text-3: #98a496;
-
-  /* Categories */
-  --cat-food:    #c8623c;
-  --cat-art:     #6b8e7f;
-  --cat-view:    #d4a558;
-  --cat-shop:    #8b6e9b;
+  --cat-food: #c8623c;
+  --cat-art: #6b8e7f;
+  --cat-view: #d4a558;
+  --cat-shop: #8b6e9b;
   --cat-history: #a8606c;
-
-  --rarity-common:    #98a496;
-  --rarity-uncommon:  #88aab5;
-  --rarity-rare:      #8b6e9b;
-  --rarity-epic:      #d4a558;
+  --rarity-common: #98a496;
+  --rarity-uncommon: #88aab5;
+  --rarity-rare: #8b6e9b;
+  --rarity-epic: #d4a558;
   --rarity-legendary: #c8623c;
-
   --accent: #d4a558;
   --accent-glow: rgba(212, 165, 88, 0.5);
   --accent-soft: rgba(212, 165, 88, 0.2);
-
-  --surface: rgba(250, 246, 236, 0.7);
-  --surface-hover: rgba(250, 246, 236, 0.85);
-  --border: rgba(45, 58, 46, 0.18);
-  --border-strong: rgba(45, 58, 46, 0.3);
-
+  --surface: rgba(250, 246, 236, 0.85);
+  --surface-hover: rgba(250, 246, 236, 0.95);
+  --border: rgba(45, 58, 46, 0.2);
+  --border-strong: rgba(45, 58, 46, 0.32);
   --font-display: 'Sora', system-ui, sans-serif;
   --font-body: 'Space Grotesk', system-ui, sans-serif;
   --font-serif: 'Cormorant Garamond', Georgia, serif;
@@ -93,7 +84,7 @@
 }
 
 /* ============================================
-   CORE — full-bleed painted background
+   BASE RESET + BODY
    ============================================ */
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -114,79 +105,151 @@ body {
   background: transparent;
 }
 
-/* FULL-BLEED watercolor willow background — Izzy's photo */
+/* ============================================
+   FULL-BLEED PHOTO BACKDROP
+   The photo IS the app — willow art dominates
+   ============================================ */
+
 .bg-layer {
   position: fixed;
   inset: 0;
-  z-index: -2;
+  z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  background: var(--cream, #faf6ec);
 }
 
-/* Day photo base */
+/* Day photo — full bleed, dominant */
 .bg-layer.day {
   background:
-    linear-gradient(180deg, rgba(143, 180, 200, 0.45) 0%, rgba(170, 200, 215, 0.3) 25%, rgba(180, 215, 195, 0.25) 50%, rgba(122, 149, 115, 0.3) 75%, rgba(60, 80, 60, 0.5) 100%),
+    linear-gradient(180deg, rgba(143, 180, 200, 0.25) 0%, rgba(170, 200, 215, 0.15) 30%, rgba(122, 149, 115, 0.2) 70%, rgba(60, 80, 60, 0.35) 100%),
     url('../assets/willow-day.jpg') center/cover no-repeat;
-  filter: saturate(0.95) contrast(1.05);
-  opacity: 0.85;
-  transform-origin: top center;
+  filter: saturate(1.05) contrast(1.08);
+  opacity: 0.95;
 }
 
-/* Night photo base — warm shop glow version */
+/* Night photo */
 .bg-layer.night {
   background:
-    linear-gradient(180deg, rgba(20, 25, 50, 0.55) 0%, rgba(35, 30, 50, 0.4) 30%, rgba(60, 50, 40, 0.35) 65%, rgba(40, 30, 25, 0.55) 100%),
+    linear-gradient(180deg, rgba(20, 25, 50, 0.35) 0%, rgba(35, 30, 50, 0.25) 30%, rgba(60, 50, 40, 0.2) 65%, rgba(40, 30, 25, 0.4) 100%),
     url('../assets/willow-night.jpg') center/cover no-repeat;
-  filter: saturate(1.05) contrast(1.08) brightness(0.85);
+  filter: saturate(1.1) contrast(1.1) brightness(0.88);
   opacity: 0;
-  transform-origin: top center;
-  /* Subtle warm vignette overlay for cozy night feel */
 }
 
-/* Watercolor wash overlay (theme-tinted) */
+/* Soft vignette overlay — darkens edges, centers focus */
 .bg-layer::after {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 0%, transparent 30%, rgba(0,0,0,0.15) 100%),
-    radial-gradient(ellipse at 50% 100%, var(--bg-1, transparent) 0%, transparent 60%);
-  mix-blend-mode: multiply;
-  opacity: 0.7;
+  background: radial-gradient(ellipse at 50% 40%, transparent 30%, rgba(0,0,0,0.15) 90%);
   pointer-events: none;
 }
 
-/* Paper-grain texture overlay (SVG noise) */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
+/* Animated drifting leaves — MANY leaves filling the screen */
+.drift-leaf {
+  position: absolute;
   pointer-events: none;
-  background-image:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.15 0 0 0 0 0.15 0 0 0 0 0.15 0 0 0 0.12 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  opacity: 0.25;
-  mix-blend-mode: multiply;
+  background: linear-gradient(135deg, var(--leaf-bright, #c5d4b8) 0%, var(--leaf-sage, #7a9573) 100%);
+  border-radius: 50% 0 50% 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  top: -30px;
+  animation: drift-down linear infinite;
+  z-index: 2;
 }
 
-/* Parallax subtle scroll on background */
-.bg-layer {
-  will-change: transform;
+[data-theme="midnight"] .drift-leaf {
+  background: linear-gradient(135deg, #b8c8e8 0%, #4a5a8c 100%);
 }
 
-/* Animated willow branches arching from top — like the reference photos */
+@keyframes drift-down {
+  0% {
+    transform: translate(0, -10vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% { opacity: 0.85; }
+  25% { transform: translate(8vw, 25vh) rotate(45deg); }
+  50% {
+    transform: translate(-4vw, 50vh) rotate(180deg);
+  }
+  75% { transform: translate(6vw, 75vh) rotate(270deg); }
+  90% { opacity: 0.7; }
+  100% {
+    transform: translate(-2vw, 110vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Atmosphere particles — light motes/pollen floating */
+.atmosphere-p {
+  position: absolute;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.3) 60%, transparent 100%);
+  border-radius: 50%;
+  animation: atmosphere-float linear infinite;
+  z-index: 3;
+  box-shadow: 0 0 4px rgba(255,255,255,0.6);
+}
+
+[data-theme="midnight"] .atmosphere-p {
+  background: radial-gradient(circle, rgba(240,216,120,0.95) 0%, rgba(240,216,120,0.3) 60%, transparent 100%);
+}
+
+@keyframes atmosphere-float {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  20% { opacity: 0.8; }
+  50% {
+    transform: translate(30vw, -20vh) scale(1.2);
+  }
+  80% { opacity: 0.6; }
+  100% {
+    transform: translate(-20vw, -50vh) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Birds — drifting silhouettes across the sky */
+.bird {
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+  animation: bird-fly linear infinite;
+  opacity: 0.5;
+}
+
+[data-theme="midnight"] .bird { opacity: 0.3; }
+
+@keyframes bird-fly {
+  0% {
+    left: -10vw;
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  5% { opacity: 0.5; }
+  50% {
+    transform: translateY(-20px) scale(1);
+  }
+  95% { opacity: 0.4; }
+  100% {
+    left: 110vw;
+    transform: translateY(10px) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* Animated willow branches arching from top */
 .willow-arch {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 45vh;
-  z-index: 0;
+  height: 50vh;
+  z-index: 5;
   pointer-events: none;
   overflow: hidden;
-  opacity: 0.85;
+  opacity: 0.75;
 }
 
 .willow-arch svg {
@@ -196,67 +259,78 @@ body::before {
 
 .willow-arch .branch {
   transform-origin: top center;
-  animation: willow-sway calc(8s / var(--wind-speed, 1)) ease-in-out infinite;
+  animation: willow-sway calc(7s / var(--wind-speed, 1)) ease-in-out infinite;
 }
 
-.willow-arch .branch.b2 { animation-delay: -1s; animation-duration: calc(7s / var(--wind-speed, 1)); }
-.willow-arch .branch.b3 { animation-delay: -2s; animation-duration: calc(9s / var(--wind-speed, 1)); }
-.willow-arch .branch.b4 { animation-delay: -3s; animation-duration: calc(10s / var(--wind-speed, 1)); }
-.willow-arch .branch.b5 { animation-delay: -1.5s; animation-duration: calc(8.5s / var(--wind-speed, 1)); }
-
-/* Leaves drifting from top */
-.leaf {
-  position: absolute;
-  width: 8px; height: 14px;
-  background: linear-gradient(135deg, var(--leaf-bright, #c5d4b8) 0%, var(--leaf-sage, #7a9573) 100%);
-  border-radius: 50% 0 50% 50%;
-  transform: rotate(-25deg);
-  opacity: 0.7;
-  pointer-events: none;
-  animation: leaf-drift calc(12000ms / var(--wind-speed, 1)) linear infinite;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-
-.leaf:nth-child(2n) {
-  width: 10px; height: 18px;
-  opacity: 0.55;
-  animation-duration: calc(15000ms / var(--wind-speed, 1));
-}
-
-.leaf:nth-child(3n) {
-  width: 6px; height: 12px;
-  opacity: 0.85;
-  animation-duration: calc(9000ms / var(--wind-speed, 1));
-}
-
-[data-theme="midnight"] .leaf {
-  background: linear-gradient(135deg, #b8c8e8 0%, #4a5a8c 100%);
-}
-
-@keyframes leaf-drift {
-  0% {
-    transform: translate(0, -10vh) rotate(0deg);
-    opacity: 0;
-  }
-  10% { opacity: 0.8; }
-  50% {
-    transform: translate(40vw, 50vh) rotate(180deg);
-  }
-  90% { opacity: 0.7; }
-  100% {
-    transform: translate(-10vw, 110vh) rotate(360deg);
-    opacity: 0;
-  }
-}
+.willow-arch .branch.b2 { animation-delay: -1s; animation-duration: calc(6s / var(--wind-speed, 1)); }
+.willow-arch .branch.b3 { animation-delay: -2s; animation-duration: calc(8s / var(--wind-speed, 1)); }
+.willow-arch .branch.b4 { animation-delay: -3s; animation-duration: calc(9s / var(--wind-speed, 1)); }
+.willow-arch .branch.b5 { animation-delay: -1.5s; animation-duration: calc(7.5s / var(--wind-speed, 1)); }
 
 @keyframes willow-sway {
-  0%, 100% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
+  0%, 100% { transform: rotate(-2.5deg) translateX(0); }
+  50% { transform: rotate(2.5deg) translateX(6px); }
 }
 
-/* Wind-reactive animation speed (CSS variable, set by JS) */
-:root {
-  --wind-speed: 1; /* multiplier */
+/* Water reflection at bottom (paintings have water at bottom) */
+.water-reflection {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 12vh;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom,
+      transparent 0%,
+      rgba(120, 150, 130, 0.15) 30%,
+      rgba(80, 110, 90, 0.3) 70%,
+      rgba(60, 90, 75, 0.5) 100%);
+}
+
+[data-theme="midnight"] .water-reflection {
+  background:
+    linear-gradient(to bottom,
+      transparent 0%,
+      rgba(40, 50, 80, 0.2) 30%,
+      rgba(30, 40, 70, 0.4) 70%,
+      rgba(20, 30, 60, 0.6) 100%);
+}
+
+/* Grass texture at very bottom */
+.grass-strip {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 5vh;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, transparent 0%, var(--leaf-sage, #7a9573) 100%);
+  opacity: 0.4;
+}
+
+[data-theme="midnight"] .grass-strip {
+  background: linear-gradient(to bottom, transparent 0%, #2d3a2e 100%);
+  opacity: 0.7;
+}
+
+/* Wind-driven speed multiplier */
+:root { --wind-speed: 1; }
+
+/* Paper grain texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.15 0 0 0 0 0.15 0 0 0 0 0.15 0 0 0 0.08 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  opacity: 0.4;
+  mix-blend-mode: multiply;
 }
 
 #app {
@@ -264,7 +338,7 @@ body::before {
   display: flex;
   flex-direction: column;
   position: relative;
-  z-index: 1;
+  z-index: 50;
 }
 
 button {

@@ -11,7 +11,7 @@ import { mountStatsScreen, unmountStatsScreen } from './screens/stats.js';
 import { ICONS } from './icons.js';
 import { particles, serene, toast } from './ui.js';
 import { play } from './audio.js';
-import { buildWillowArchSVG, buildDriftingLeaves } from './willow-arch.js';
+import { buildWillowArchSVG, buildDriftingLeaves, buildAtmosphereParticles, buildBirds } from './willow-arch.js';
 
 let currentTab = 'surprise';
 const TABS = [
@@ -174,7 +174,7 @@ function h(tag, attrs = {}, children = []) {
   return el;
 }
 
-// === Background + Willow arch ===
+// === Background + Atmosphere ===
 
 function buildBackground() {
   const bg = h('div', { class: 'bg-layer day' });
@@ -183,13 +183,29 @@ function buildBackground() {
   document.body.insertBefore(bg, document.body.firstChild);
   applyDayNight();
 
-  // Animated willow arch (drooping branches + leaves) on top of bg
+  // Willow arch with drooping branches + leaves
   const arch = h('div', { class: 'willow-arch', html: buildWillowArchSVG() });
   document.body.appendChild(arch);
 
-  // Drifting leaves falling from top
-  const leavesHost = h('div', { class: 'leaves-host', style: { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '2' }, html: buildDriftingLeaves() });
+  // MANY drifting leaves filling the screen (60 leaves)
+  const leavesHost = h('div', { class: 'leaves-host', style: { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '2' }, html: buildDriftingLeaves(60) });
   document.body.appendChild(leavesHost);
+
+  // Atmosphere particles (40 light motes)
+  const atmoHost = h('div', { class: 'atmosphere-host', style: { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '3' }, html: buildAtmosphereParticles(40) });
+  document.body.appendChild(atmoHost);
+
+  // Birds drifting across the sky
+  const birdsHost = h('div', { class: 'birds-host', style: { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '4' }, html: buildBirds() });
+  document.body.appendChild(birdsHost);
+
+  // Water reflection at bottom (paintings have water)
+  const water = h('div', { class: 'water-reflection' });
+  document.body.appendChild(water);
+
+  // Grass strip at very bottom
+  const grass = h('div', { class: 'grass-strip' });
+  document.body.appendChild(grass);
 }
 
 // === Splash screen ===
