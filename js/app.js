@@ -2,7 +2,8 @@
 // With watercolor painted background (Izzy's real photos) + wind reactivity
 
 import {
-  initState, getState, getCurrentPlayer, applyTheme, getActiveTheme, THEMES
+  initState, getState, getCurrentPlayer, applyTheme, getActiveTheme, THEMES,
+  getScore
 } from './state.js';
 import { mountSurpriseScreen, unmountSurpriseScreen, refreshSurprise } from './screens/surprise.js?v=30';
 import { mountMapScreen, unmountMapScreen, refreshMap } from './screens/map.js?v=30';
