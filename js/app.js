@@ -5,7 +5,7 @@ import {
   initState, getState, getCurrentPlayer, applyTheme, getActiveTheme, THEMES,
   getScore
 } from './state.js';
-import { mountSurpriseScreen, unmountSurpriseScreen, refreshSurprise } from './screens/surprise.js?v=35';
+import { mountSurpriseScreen, unmountSurpriseScreen, refreshSurprise } from './screens/surprise.js?v=40';
 import { mountMapScreen, unmountMapScreen, refreshMap } from './screens/map.js?v=30';
 import { mountAddScreen, unmountAddScreen } from './screens/add.js?v=30';
 import { mountStatsScreen, unmountStatsScreen } from './screens/stats.js?v=30';
@@ -133,7 +133,7 @@ function render() {
       ])
     ]));
 
-  const main = h('main', { class: 'app-main', id: 'main' });
+  const main = h('main', { class: 'app-main', id: 'main', style: { paddingBottom: 'calc(70px + env(safe-area-inset-bottom, 0))' } });
   app.appendChild(main);
 
   app.appendChild(h('nav', {
