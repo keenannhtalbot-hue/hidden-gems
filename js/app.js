@@ -51,12 +51,13 @@ function applyDayNight(force = null) {
   const nightLayer = document.querySelector('.bg-layer.night');
   if (!dayLayer || !nightLayer) return;
 
+  // Use style.setProperty so we don't wipe out other inline styles
   if (state === 'day') {
-    dayLayer.style.cssText = 'opacity: 1 !important;';
-    nightLayer.style.cssText = 'opacity: 0 !important;';
+    dayLayer.style.setProperty('opacity', '1', 'important');
+    nightLayer.style.setProperty('opacity', '0', 'important');
   } else {
-    dayLayer.style.cssText = 'opacity: 0 !important;';
-    nightLayer.style.cssText = 'opacity: 1 !important;';
+    dayLayer.style.setProperty('opacity', '0', 'important');
+    nightLayer.style.setProperty('opacity', '1', 'important');
   }
 }
 
@@ -188,7 +189,7 @@ function buildBackground() {
 
   document.body.insertBefore(bgNight, document.body.firstChild);
   document.body.insertBefore(bg, document.body.firstChild);
-  applyDayNight();
+  applyDayNight(); // SAFE: uses setProperty, doesn't wipe styles
 
   // Willow arch with drooping branches + leaves
   const arch = document.createElement('div');
