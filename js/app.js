@@ -252,9 +252,17 @@ function showSplash() {
 // === Boot ===
 
 function boot() {
-  initState();
-  applyTheme(getActiveTheme());
-  buildBackground();
+  console.log('[boot] starting');
+  try {
+    initState();
+    applyTheme(getActiveTheme());
+    console.log('[boot] state initialized, theme applied');
+    buildBackground();
+    console.log('[boot] background built');
+  } catch (e) {
+    console.error('[boot] background error:', e);
+    // Don't bail — continue rendering UI
+  }
   showSplash();
   // Fetch wind in background
   fetchWind().then(() => {
