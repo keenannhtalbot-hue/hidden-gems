@@ -181,11 +181,12 @@ function buildBackground() {
   // bg-layer with inline styles as guaranteed fallback
   const bg = document.createElement('div');
   bg.className = 'bg-layer day';
-  bg.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;';
+  // CRITICAL: set bg image inline so it ALWAYS shows
+  bg.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;background-image:url(assets/willow-day.jpg) !important;background-size:cover !important;background-position:center !important;';
 
   const bgNight = document.createElement('div');
   bgNight.className = 'bg-layer night';
-  bgNight.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;opacity:0;';
+  bgNight.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;opacity:0;background-image:url(assets/willow-night.jpg) !important;background-size:cover !important;background-position:center !important;';
 
   document.body.insertBefore(bgNight, document.body.firstChild);
   document.body.insertBefore(bg, document.body.firstChild);
