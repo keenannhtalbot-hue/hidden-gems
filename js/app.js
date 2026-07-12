@@ -1,18 +1,19 @@
-// App root — shell, tabs, navigation, lifecycle
+// App root — Izzy's Interstellar Adventures
 
-import { initState, getState, subscribe, getCurrentPlayer } from './state.js';
+import { initState, getState, getCurrentPlayer } from './state.js';
 import { mountSurpriseScreen, unmountSurpriseScreen, refreshSurprise } from './screens/surprise.js';
 import { mountMapScreen, unmountMapScreen, refreshMap } from './screens/map.js';
 import { mountAddScreen, unmountAddScreen } from './screens/add.js';
 import { mountStatsScreen, unmountStatsScreen } from './screens/stats.js';
+import { ICONS } from './icons.js';
 import { play } from './audio.js';
 
 let currentTab = 'surprise';
 const TABS = [
-  { id: 'surprise', label: 'Surprise', icon: '🎲' },
-  { id: 'map',      label: 'Map',      icon: '🗺️' },
-  { id: 'add',      label: 'Add',      icon: '➕' },
-  { id: 'stats',    label: 'Stats',    icon: '📊' }
+  { id: 'surprise', label: 'Beam',    icon: ICONS.rocket('currentColor') },
+  { id: 'map',      label: 'Map',     icon: ICONS.planet('currentColor') },
+  { id: 'add',      label: 'Plot',    icon: ICONS.plus('currentColor') },
+  { id: 'stats',    label: 'Mission', icon: ICONS.pulse('currentColor') }
 ];
 
 const MOUNTERS = {
@@ -35,11 +36,11 @@ function render() {
 
   app.appendChild(h('header', { class: 'app-header' }, [
     h('div', { class: 'brand' }, [
-      h('span', { class: 'brand-mark' }, ['💎']),
-      h('span', {}, ['Hidden Gems'])
+      h('span', { class: 'brand-mark', html: ICONS.rocket('#FFD93D') }),
+      h('span', {}, ['Izzy\u2019s Adventures'])
     ]),
-    h('div', { class: 'player-chip', title: 'Tap to switch player on Stats' }, [
-      h('span', { class: 'avatar', style: { background: player.color } }, [player.name.charAt(0)]),
+    h('div', { class: 'player-chip', style: { '--avatar-color': player.color } }, [
+      h('span', { class: 'avatar' }, [player.name.charAt(0)]),
       h('span', {}, [player.name])
     ])
   ]));
@@ -54,7 +55,7 @@ function render() {
         'aria-current': currentTab === t.id ? 'page' : 'false',
         onClick: () => switchTab(t.id)
       }, [
-        h('span', { class: 'icon' }, [t.icon]),
+        h('span', { class: 'icon', html: t.icon }),
         h('span', {}, [t.label])
       ])
     )
@@ -68,10 +69,11 @@ function switchTab(id) {
   UNMOUNTERS[currentTab]();
   currentTab = id;
   play('tap');
+  haptic(8);
   render();
 }
 
-// h() helper (mini)
+// h() helper (mini, duplicated so app.js doesn't import ui.js which would create cycle)
 function h(tag, attrs = {}, children = []) {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
@@ -79,6 +81,7 @@ function h(tag, attrs = {}, children = []) {
     if (k === 'class') el.className = v;
     else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
     else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === 'html') el.innerHTML = v;
     else if (v === true) el.setAttribute(k, '');
     else el.setAttribute(k, v);
   }
@@ -100,7 +103,6 @@ function boot() {
   render();
   setupInstallPrompt();
   setupBadgeUnlockListener();
-  setupServiceWorker();
   setupNavigationListener();
 }
 
@@ -129,11 +131,10 @@ function setupInstallPrompt() {
 function setupBadgeUnlockListener() {
   window.addEventListener('badge-unlocked', (e) => {
     const badge = e.detail;
-    import('./ui.js').then(({ toast, confetti }) => {
-      toast(`🏅 Badge unlocked: ${badge.label}!`, 'success', 4000);
-      confetti();
-      play('fanfare');
-    });
+    toast(`🏅 Badge unlocked: ${badge.label}!`, 'success', 4000);
+    confetti({ count: 30 });
+    play('fanfare');
+    haptic([15, 30, 15]);
     refreshSurprise();
     refreshMap();
   });
@@ -145,14 +146,6 @@ function setupNavigationListener() {
   });
 }
 
-function setupServiceWorker() {
-  if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-    // Service worker file doesn't exist yet — would cache assets for offline use
-    // Keeping as future enhancement. For now we ship without it.
-  }
-}
-
-// Go!
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', boot);
 } else {

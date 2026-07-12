@@ -1,7 +1,7 @@
 {
-  "name": "Hidden Gems Hunter",
-  "short_name": "Gems",
-  "description": "Toronto treasure hunts with friends",
+  "name": "Izzy's Interstellar Adventures",
+  "short_name": "Izzy",
+  "description": "Toronto treasure hunts through the stars — with your favorite local Izzy",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
