@@ -253,17 +253,9 @@ function showSplash() {
 // === Boot ===
 
 function boot() {
-  console.log('[boot] starting');
-  try {
-    initState();
-    applyTheme(getActiveTheme());
-    console.log('[boot] state initialized, theme applied');
-    buildBackground();
-    console.log('[boot] background built');
-  } catch (e) {
-    console.error('[boot] background error:', e);
-    // Don't bail — continue rendering UI
-  }
+  initState();
+  applyTheme(getActiveTheme());
+  buildBackground();
   showSplash();
   // Fetch wind in background
   fetchWind().then(() => {
@@ -353,7 +345,7 @@ function setupNavigationListener() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { try { boot(); } catch(e) { console.error('BOOT ERROR:', e); document.body.innerHTML = '<pre style="color:red;padding:20px;">BOOT ERROR: ' + e.message + '\n' + e.stack + '</pre>'; } });
+  document.addEventListener('DOMContentLoaded', boot);
 } else {
-  try { boot(); } catch(e) { console.error('BOOT ERROR:', e); document.body.innerHTML = '<pre style="color:red;padding:20px;">BOOT ERROR: ' + e.message + '\n' + e.stack + '</pre>'; }
+  boot();
 }
