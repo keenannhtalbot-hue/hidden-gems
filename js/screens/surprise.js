@@ -1,8 +1,8 @@
 // Surprise Me screen — main hero + filter chips + gem card
 
-import { h, toast, confetti } from './ui.js';
-import { getState, getCategory, getGem, allGems, toggleVisited, isVisited, getNote, setNote, toggleFilter, getCurrentPlayer, getPlayer, getScore, getUnlockedBadges } from './state.js';
-import { play } from './audio.js';
+import { h, toast, confetti } from '../ui.js';
+import { getState, getCategory, getGem, allGems, toggleVisited, isVisited, getNote, setNote, toggleFilter, getCurrentPlayer, getPlayer, getScore, getUnlockedBadges } from '../state.js';
+import { play } from '../audio.js';
 
 let currentGem = null;
 let mounted = false;

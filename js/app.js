@@ -146,7 +146,7 @@ function setupNavigationListener() {
 }
 
 function setupServiceWorker() {
-  if ('serviceWorker' in navigator) {
+  if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
     // Service worker file doesn't exist yet — would cache assets for offline use
     // Keeping as future enhancement. For now we ship without it.
   }
