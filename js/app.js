@@ -5,7 +5,7 @@ import {
   initState, getState, getCurrentPlayer, applyTheme, getActiveTheme, THEMES,
   getScore
 } from './state.js';
-import { mountSurpriseScreen, unmountSurpriseScreen, refreshSurprise } from './screens/surprise.js?v=32';
+import { mountSurpriseScreen, unmountSurpriseScreen, refreshSurprise } from './screens/surprise.js?v=35';
 import { mountMapScreen, unmountMapScreen, refreshMap } from './screens/map.js?v=30';
 import { mountAddScreen, unmountAddScreen } from './screens/add.js?v=30';
 import { mountStatsScreen, unmountStatsScreen } from './screens/stats.js?v=30';

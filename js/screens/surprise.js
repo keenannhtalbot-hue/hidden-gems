@@ -45,13 +45,13 @@ function render() {
       style: {
         position: 'relative',
         width: '100%',
-        height: '35vh',
-        minHeight: '260px',
-        maxHeight: '380px',
+        height: '28vh',
+        minHeight: '200px',
+        maxHeight: '280px',
         marginTop: '-16px',
         marginLeft: '-16px',
         marginRight: '-16px',
-        marginBottom: '24px',
+        marginBottom: '16px',
         overflow: 'hidden',
         borderRadius: '0 0 32px 32px',
         boxShadow: '0 12px 40px rgba(0,0,0,0.4)'
@@ -133,10 +133,8 @@ function render() {
         onClick: handleGetLocation
       }, ['📍 Use my location for distance']) : null
     ]),
-    currentGem ? renderGemCard(currentGem) : h('div', { class: 'empty' }, [
-      h('div', { class: 'icon', html: ICONS.willow('var(--accent)') }),
-      h('h3', {}, ['Ready to wander?']),
-      h('p', {}, ['Hit "Blow Me Away" and let the wind pick your next Toronto gem. Filter by category or set a distance from you.'])
+    currentGem ? renderGemCard(currentGem) : h('div', { class: 'empty', style: { padding: '8px 16px' } }, [
+      h('p', { style: { fontSize: '13px', marginTop: '0' } }, ['Tap "Blow Me Away" to discover a gem'])
     ])
   ]);
   mainEl.replaceChildren(root);
