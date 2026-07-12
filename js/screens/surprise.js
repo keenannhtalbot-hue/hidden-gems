@@ -40,12 +40,37 @@ function render() {
 
   const root = h('div', { class: 'screen-surprise' }, [
     // HERO PHOTO BANNER — the willow photo as a focal piece at the top
-    h('div', { class: 'hero-photo-banner' }, [
-      h('div', { class: 'hero-photo', style: { backgroundImage: `url(assets/${heroPhoto})` } }),
-      h('div', { class: 'hero-overlay' }, [
-        h('div', { class: 'hero-text' }, [
-          h('h1', { class: 'hero-title' }, ['Izzy\u2019s Weeping Willow Wanderings']),
-          h('p', { class: 'hero-subtitle' }, ['Toronto · With your favorite local'])
+    h('div', {
+      class: 'hero-photo-banner',
+      style: {
+        position: 'relative',
+        width: '100%',
+        height: '35vh',
+        minHeight: '260px',
+        maxHeight: '380px',
+        marginTop: '-16px',
+        marginLeft: '-16px',
+        marginRight: '-16px',
+        marginBottom: '24px',
+        overflow: 'hidden',
+        borderRadius: '0 0 32px 32px',
+        boxShadow: '0 12px 40px rgba(0,0,0,0.4)'
+      }
+    }, [
+      h('div', {
+        class: 'hero-photo',
+        style: {
+          position: 'absolute',
+          inset: '0',
+          backgroundImage: `url(assets/${heroPhoto})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 25%'
+        }
+      }),
+      h('div', { class: 'hero-overlay', style: { position: 'absolute', inset: '0', background: 'linear-gradient(180deg, rgba(45,58,46,0.3) 0%, rgba(45,58,46,0.1) 30%, rgba(45,58,46,0.4) 70%, rgba(45,58,46,0.85) 100%)', display: 'flex', alignItems: 'flex-end', padding: '24px' } }, [
+        h('div', { class: 'hero-text', style: { color: 'white', textShadow: '0 2px 12px rgba(0,0,0,0.7)' } }, [
+          h('h1', { class: 'hero-title', style: { fontFamily: 'Cormorant Garamond, Georgia, serif', fontSize: 'clamp(26px, 7vw, 38px)', fontWeight: '600', fontStyle: 'italic', letterSpacing: '-0.02em', lineHeight: '1', marginBottom: '6px', color: 'white' } }, ['Izzy\u2019s Weeping Willow Wanderings']),
+          h('p', { class: 'hero-subtitle', style: { fontFamily: 'Space Grotesk, system-ui, sans-serif', fontSize: '12px', fontWeight: '700', letterSpacing: '0.2em', textTransform: 'uppercase', opacity: '0.9', color: 'white' } }, ['Toronto · With your favorite local'])
         ])
       ])
     ]),
