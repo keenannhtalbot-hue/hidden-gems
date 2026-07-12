@@ -308,83 +308,9 @@ body {
   }
 }
 
-/* Animated willow branches arching from top */
-.willow-arch {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50vh;
-  z-index: 5;
-  pointer-events: none;
-  overflow: hidden;
-  opacity: 0.75;
-}
-
-.willow-arch svg {
-  width: 100%;
-  height: 100%;
-}
-
-.willow-arch .branch {
-  transform-origin: top center;
-  animation: willow-sway calc(7s / var(--wind-speed, 1)) ease-in-out infinite;
-}
-
-.willow-arch .branch.b2 { animation-delay: -1s; animation-duration: calc(6s / var(--wind-speed, 1)); }
-.willow-arch .branch.b3 { animation-delay: -2s; animation-duration: calc(8s / var(--wind-speed, 1)); }
-.willow-arch .branch.b4 { animation-delay: -3s; animation-duration: calc(9s / var(--wind-speed, 1)); }
-.willow-arch .branch.b5 { animation-delay: -1.5s; animation-duration: calc(7.5s / var(--wind-speed, 1)); }
-
-@keyframes willow-sway {
-  0%, 100% { transform: rotate(-2.5deg) translateX(0); }
-  50% { transform: rotate(2.5deg) translateX(6px); }
-}
-
-/* Water reflection at bottom (paintings have water at bottom) */
-.water-reflection {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 12vh;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    linear-gradient(to bottom,
-      transparent 0%,
-      rgba(120, 150, 130, 0.15) 30%,
-      rgba(80, 110, 90, 0.3) 70%,
-      rgba(60, 90, 75, 0.5) 100%);
-}
-
-[data-theme="midnight"] .water-reflection {
-  background:
-    linear-gradient(to bottom,
-      transparent 0%,
-      rgba(40, 50, 80, 0.2) 30%,
-      rgba(30, 40, 70, 0.4) 70%,
-      rgba(20, 30, 60, 0.6) 100%);
-}
-
-/* Grass texture at very bottom */
-.grass-strip {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 5vh;
-  z-index: 2;
-  pointer-events: none;
-  background:
-    linear-gradient(to bottom, transparent 0%, var(--leaf-sage, #7a9573) 100%);
-  opacity: 0.4;
-}
-
-[data-theme="midnight"] .grass-strip {
-  background: linear-gradient(to bottom, transparent 0%, #2d3a2e 100%);
-  opacity: 0.7;
-}
+/* Willow arch hidden (kept as no-op element for stability) */
+.willow-arch { height: 0 !important; overflow: hidden !important; }
+.willow-arch svg { display: none !important; }
 
 /* Wind-driven speed multiplier */
 :root { --wind-speed: 1; }
@@ -670,6 +596,25 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
+.player-chip .player-name {
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-chip .player-score {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 2px 8px;
+  background: var(--accent);
+  color: var(--bg-0);
+  border-radius: 999px;
+  min-width: 28px;
+  text-align: center;
+}
+
 .app-main {
   flex: 1;
   padding: 0 16px;
@@ -738,6 +683,60 @@ img { max-width: 100%; display: block; }
   font-size: 15px;
   max-width: 340px;
   margin: 0 auto;
+}
+
+.surprise-hero .today-mood {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+  font-style: normal;
+}
+
+.surprise-hero .welcome-text {
+  margin-bottom: 16px;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+/* Quick stats row — small useful feature */
+.quick-stats {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.stat-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 6px 12px;
+  background: var(--surface);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-family: var(--font-body);
+}
+
+.stat-pill .stat-num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--accent);
+}
+
+.stat-pill .stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: lowercase;
+  letter-spacing: 0.04em;
 }
 
 .blow-btn {

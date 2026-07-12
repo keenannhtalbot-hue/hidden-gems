@@ -11,7 +11,7 @@ import { mountStatsScreen, unmountStatsScreen } from './screens/stats.js?v=20';
 import { ICONS } from './icons.js';
 import { particles, serene, toast } from './ui.js';
 import { play } from './audio.js';
-import { buildWillowArchSVG, buildDriftingLeaves, buildAtmosphereParticles, buildBirds } from './willow-arch.js';
+import { buildDriftingLeaves } from './willow-arch.js';
 
 let currentTab = 'surprise';
 const TABS = [
@@ -112,24 +112,25 @@ function render() {
   app.style.cssText = 'position:relative;z-index:100;';
 
   app.appendChild(h('header', {
-    class: 'app-header',
-    style: { position: 'sticky', top: '0', zIndex: '200' }
-  }, [
-    h('div', { class: 'brand' }, [
-      h('span', { class: 'brand-mark', html: ICONS.willow('#5a7355') }),
-      h('span', {}, ['Izzy\u2019s Wanderings'])
-    ]),
-    h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
-      h('div', { class: 'wind-pill', id: 'wind-pill', hidden: true }, [
-        h('span', { class: 'wind-arrow' }, ['💨']),
-        h('span', { class: 'wind-text' }, ['—'])
+      class: 'app-header',
+      style: { position: 'sticky', top: '0', zIndex: '200' }
+    }, [
+      h('div', { class: 'brand' }, [
+        h('span', { class: 'brand-mark', html: ICONS.willow('#5a7355') }),
+        h('span', {}, ['Izzy\u2019s Wanderings'])
       ]),
-      h('div', { class: 'player-chip', style: { '--avatar-color': player.color } }, [
-        h('span', { class: 'avatar' }, [player.name.charAt(0)]),
-        h('span', {}, [player.name])
+      h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } }, [
+        h('div', { class: 'wind-pill', id: 'wind-pill', hidden: true }, [
+          h('span', { class: 'wind-arrow' }, ['💨']),
+          h('span', { class: 'wind-text' }, ['—'])
+        ]),
+        h('div', { class: 'player-chip', style: { '--avatar-color': player.color } }, [
+          h('span', { class: 'avatar' }, [player.name.charAt(0)]),
+          h('span', { class: 'player-name' }, [player.name]),
+          h('span', { class: 'player-score' }, [String(getScore(player.id))])
+        ])
       ])
-    ])
-  ]));
+    ]));
 
   const main = h('main', { class: 'app-main', id: 'main' });
   app.appendChild(main);
@@ -196,51 +197,18 @@ function buildBackground() {
 
   const bgNight = document.createElement('div');
   bgNight.className = 'bg-layer night';
-  bgNight.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;opacity:0;background-image:linear-gradient(rgba(15,20,40,0.9),rgba(15,20,40,0.9)),url(assets/willow-night.jpg) !important;background-size:cover !important;background-position:center 25% !important;opacity:0.25;';
+  bgNight.style.cssText = 'position:fixed !important;inset:0 !important;z-index:0 !important;pointer-events:none;overflow:hidden;width:100vw;height:100vh;opacity:0;background-image:linear-gradient(rgba(15,20,40,0.9),rgba(15,20,40,0.9)),url(assets/willow-night.jpg) !important;background-size:cover !important;background-position:center 25% !important;';
 
   document.body.insertBefore(bgNight, document.body.firstChild);
   document.body.insertBefore(bg, document.body.firstChild);
   applyDayNight(); // SAFE: uses setProperty, doesn't wipe styles
 
-  // Willow arch with drooping branches + leaves
-  const arch = document.createElement('div');
-  arch.className = 'willow-arch';
-  arch.style.cssText = 'position:fixed !important;top:0;left:0;right:0;height:50vh;z-index:5;pointer-events:none;overflow:hidden;';
-  arch.innerHTML = buildWillowArchSVG();
-  document.body.appendChild(arch);
-
-  // MANY drifting leaves filling the screen (60 leaves - dialed back so UI is readable)
+  // Drifting leaves (40 - dialed back, subtle)
   const leavesHost = document.createElement('div');
   leavesHost.className = 'leaves-host';
-  leavesHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:6;opacity:0.5;';
-  leavesHost.innerHTML = buildDriftingLeaves(60);
+  leavesHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:6;opacity:0.4;';
+  leavesHost.innerHTML = buildDriftingLeaves(40);
   document.body.appendChild(leavesHost);
-
-  // Atmosphere particles (30 light motes - subtle)
-  const atmoHost = document.createElement('div');
-  atmoHost.className = 'atmosphere-host';
-  atmoHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:4;opacity:0.4;';
-  atmoHost.innerHTML = buildAtmosphereParticles(30);
-  document.body.appendChild(atmoHost);
-
-  // Birds drifting across the sky (3 birds - subtle)
-  const birdsHost = document.createElement('div');
-  birdsHost.className = 'birds-host';
-  birdsHost.style.cssText = 'position:fixed !important;inset:0;pointer-events:none;z-index:5;opacity:0.35;';
-  birdsHost.innerHTML = buildBirds();
-  document.body.appendChild(birdsHost);
-
-  // Water reflection at bottom (subtle)
-  const water = document.createElement('div');
-  water.className = 'water-reflection';
-  water.style.cssText = 'position:fixed !important;bottom:0;left:0;right:0;height:8vh;z-index:1;pointer-events:none;opacity:0.6;';
-  document.body.appendChild(water);
-
-  // Grass strip at very bottom (subtle)
-  const grass = document.createElement('div');
-  grass.className = 'grass-strip';
-  grass.style.cssText = 'position:fixed !important;bottom:0;left:0;right:0;height:4vh;z-index:2;pointer-events:none;opacity:0.5;';
-  document.body.appendChild(grass);
 }
 
 // === Splash screen ===

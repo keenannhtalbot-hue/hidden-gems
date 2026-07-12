@@ -75,7 +75,8 @@ function render() {
       ])
     ]),
     h('div', { class: 'surprise-hero' }, [
-      h('p', {}, ['Wander together. Find food, art, secret views, and forgotten history.']),
+      h('p', { class: 'today-mood' }, [renderTodayMood()]),
+      h('p', { class: 'welcome-text' }, ['Wander together. Find food, art, secret views, and forgotten history.']),
       h('button', {
         class: 'blow-btn',
         onClick: handleBlow,
@@ -83,7 +84,22 @@ function render() {
       }, [
         h('span', { class: 'wind-icon', html: ICONS.wind('#0c0c20') }),
         h('span', {}, ['Blow Me Away'])
-      ])
+      ]),
+      // Quick stats row - useful feature showing progress
+      s.visited && Object.keys(s.visited).length > 0 ? h('div', { class: 'quick-stats' }, [
+        h('div', { class: 'stat-pill' }, [
+          h('span', { class: 'stat-num' }, [String(Object.keys(s.visited).length)]),
+          h('span', { class: 'stat-label' }, ['found'])
+        ]),
+        h('div', { class: 'stat-pill' }, [
+          h('span', { class: 'stat-num' }, [String(s.unlocks?.photoGalleryIds?.length || 0)]),
+          h('span', { class: 'stat-label' }, ['photos'])
+        ]),
+        h('div', { class: 'stat-pill' }, [
+          h('span', { class: 'stat-num' }, [String(s.customGems?.length || 0)]),
+          h('span', { class: 'stat-label' }, ['planted'])
+        ])
+      ]) : null
     ]),
     h('div', { class: 'filter-bar', role: 'toolbar', 'aria-label': 'Filter by category' },
       renderCategoryFilters(cats)
@@ -294,6 +310,40 @@ function renderDistance(gem) {
   const a = Math.sin(dLat/2)**2 + Math.cos(toRad(s.userLocation.lat)) * Math.cos(toRad(gem.lat)) * Math.sin(dLng/2)**2;
   const km = 2 * R * Math.asin(Math.sqrt(a));
   return h('span', {}, ['📏 ' + km.toFixed(1) + ' km']);
+}
+
+// Render "today's mood" — uses time + last known wind to set vibe
+function renderTodayMood() {
+  const hour = new Date().getHours();
+  const visited = Object.keys(getState().visited || {}).length;
+
+  let greeting = 'Good morning';
+  if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
+  else if (hour >= 17 && hour < 21) greeting = 'Good evening';
+  else if (hour >= 21 || hour < 5) greeting = 'Late wander';
+
+  let vibe = '';
+  // Try to read the wind pill for current speed
+  const windText = document.querySelector('.wind-text')?.textContent || '';
+  if (windText) {
+    vibe = ' · ' + windText;
+  } else {
+    // Fallback: time-based vibe
+    if (hour >= 6 && hour < 11) vibe = ' · misty morning';
+    else if (hour >= 11 && hour < 16) vibe = ' · warm sun';
+    else if (hour >= 16 && hour < 20) vibe = ' · golden hour';
+    else vibe = ' · starlit';
+  }
+
+  const encouragement = visited === 0
+    ? 'First wander together'
+    : visited < 5
+      ? 'Keep exploring'
+      : visited < 15
+        ? 'You\'re on a roll'
+        : 'Toronto local status';
+
+  return `${greeting} · ${encouragement}${vibe}`;
 }
 
 // === Handlers ===
